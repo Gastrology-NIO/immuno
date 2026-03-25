@@ -9,6 +9,7 @@ gene_counts<-load_data_counts("./htseq/")
 # 1 pobranie (3 miesiące vs powyżej 2 lat)
 conditions <- list(type='Pobranie 1', 'time of OS'=c('poniżej 3 miesięcy', '> 2 lata'))
 metadata_1_analyse <- cut_metadata(metadata, conditions)
+metadata_1_analyse$research<-metadata_1_analyse$'time of OS'
 
 # 1 pobranie (I linia vs kolejna linia)
 conditions <- list(type='Pobranie 1', 'linia'=c('I linia', ''))
