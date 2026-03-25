@@ -20,3 +20,12 @@ load_data_counts<- function(path_htseq, gene_no_count_save_file){
   return(experiments_all)
 }
   
+cut_metadata<-function(metadata, conditions){
+  for (i in 1:length(conditions)){
+    print(i)
+    df[df[,c("sample_type")]  %in% c("skora"),]
+    name=names(conditions)[i]
+    metadata<-metadata[metadata[,name] %in% conditions[name]]
+  }
+  return(metadata)
+}
