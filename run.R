@@ -5,7 +5,7 @@ source("./src/load_data.R")
 metadata<-load_data_meta("./data/metadata_jag.csv")
 gene_counts<-load_data_counts("./htseq/", "./data/gene_counts.csv")
 
-
+# todo: dodać nazwy genów itd
 # 1 pobranie (3 miesiące vs powyżej 2 lat)
 conditions <- list(type='Pobranie 1', 'time.of.OS'=c('poni\xbfej 3 miesi\xeacy', '> 2 lata'))
 metadata_1_analyse <- cut_metadata(metadata, conditions)
@@ -34,13 +34,12 @@ metadata_3_analyse <- cut_metadata(metadata, conditions)
 metadata_3_analyse$research<-metadata_3_analyse$type
 metadata_3_analyse$research[metadata_3_analyse$research=='Pobranie 1']<-"Control"
 metadata_3_analyse$research[metadata_3_analyse$research=='Pobranie 2']<-"Searched"
+metadata_3_analyse<- metadata_3_analyse[!c(metadata_3_analyse$probe_name %in% c("117IM","45IM")),]
+metadata_3_analyse[metadata_3_analyse$probe_name != "",] -> metadata_3_analyse
 # metadata_3_analyse<- metadata_3_analyse[!c(metadata_3_analyse$probe_name %in% c("123IM", "96IM",  "95IM", "107IM", "92IM" , "116IM", "117IM", "110IM", "130IM","27IM",
 # "34IM","36IM","33IM","39IM","43IM","35IM","64IM","45IM","72IM","47IM","49IM","66IM","61IM","78IM","70IM","87IM","94IM")),]
 # samtools sort -n -o ./sorted/41IM.nameSorted.bam ./star/41IMAligned.sortedByCoord.out.bam
-# htseq-count --stranded=reverse -f bam -r name ./sorted/RNA_41IM.nameSorted.bam ./reference/omo_sapiens.GRCh38.99.gtf > ./htseq/41IM.txt
-
 # htseq-count --stranded=reverse -f bam -r name ./sorted/117IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/117IM.txt &
-# htseq-count --stranded=reverse -f bam -r name ./sorted/45IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/45IM.txt &
 
 x<-load_DGE(metadata_3_analyse,  "./htseq/") 
 output_file<-"./result/NtproBNP_0_pobranie_vs_2_pobranie.csv"
@@ -56,6 +55,27 @@ metadata_4_analyse$research<-metadata_4_analyse$type
 metadata_4_analyse$research[metadata_4_analyse$research=='Pobranie 1']<-"Control"
 metadata_4_analyse$research[metadata_4_analyse$research=='Pobranie 2']<-"Searched"
 metadata_4_analyse<- metadata_4_analyse[metadata_4_analyse$probe_name != "",]
+metadata_4_analyse<- metadata_4_analyse[!c(metadata_4_analyse$probe_name %in% c("117IM","45IM","46IM", "54IM", "63IM", "68IM", "84IM", "102IM", "113IM", "111IM", "125IM")),]
+# "46IM", "54IM", "63IM", "68IM", "84IM", "102IM", "113IM", "111IM", "125IM"
+samtools sort -n -o ./sorted/46IM.nameSorted.bam ./star/46IMAligned.sortedByCoord.out.bam &
+samtools sort -n -o ./sorted/54IM.nameSorted.bam ./star/54IMAligned.sortedByCoord.out.bam &
+samtools sort -n -o ./sorted/68IM.nameSorted.bam ./star/68IMAligned.sortedByCoord.out.bam &
+samtools sort -n -o ./sorted/84IM.nameSorted.bam ./star/84IMAligned.sortedByCoord.out.bam &
+samtools sort -n -o ./sorted/102IM.nameSorted.bam ./star/102IMAligned.sortedByCoord.out.bam &
+samtools sort -n -o ./sorted/113IM.nameSorted.bam ./star/113IMAligned.sortedByCoord.out.bam &
+samtools sort -n -o ./sorted/111IM.nameSorted.bam ./star/111IMAligned.sortedByCoord.out.bam &
+samtools sort -n -o ./sorted/125IM.nameSorted.bam ./star/125IMAligned.sortedByCoord.out.bam &
+111 <- error
+
+htseq-count --stranded=reverse -f bam -r name ./sorted/46IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/46IM.txt &
+htseq-count --stranded=reverse -f bam -r name ./sorted/54IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/54IM.txt &
+htseq-count --stranded=reverse -f bam -r name ./sorted/68IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/68IM.txt &
+htseq-count --stranded=reverse -f bam -r name ./sorted/84IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/84IM.txt &
+htseq-count --stranded=reverse -f bam -r name ./sorted/102IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/102IM.txt &
+htseq-count --stranded=reverse -f bam -r name ./sorted/113IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/113IM.txt &
+htseq-count --stranded=reverse -f bam -r name ./sorted/111IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/111IM.txt &
+htseq-count --stranded=reverse -f bam -r name ./sorted/125IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/125IM.txt &
+
 x<-load_DGE(metadata_4_analyse,  "./htseq/") 
 output_file<-"./result/NtproBNP_1_pobranie_vs_2_pobranie.csv"
 run_4<-run_limma(x, metadata_4_analyse, output_file)
