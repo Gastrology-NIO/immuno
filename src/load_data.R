@@ -25,7 +25,7 @@ load_DGE <- function(metadata, folder){
   samplenames<-sapply(colnames(x), function(x) strsplit(x, "/")[[1]][3])
   colnames(x) <- samplenames
   x$samples$research <- metadata$research
-  x$samples$s <- metadata_tmp$s
+  x$samples$s <- metadata$s
   return(x)
 }
 
