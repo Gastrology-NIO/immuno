@@ -69,10 +69,11 @@ samtools sort -n -o ./sorted/125IM.nameSorted.bam ./star/125IMAligned.sortedByCo
 
 htseq-count --stranded=reverse -f bam -r name ./sorted/46IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/46IM.txt &
 htseq-count --stranded=reverse -f bam -r name ./sorted/54IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/54IM.txt &
-htseq-count --stranded=reverse -f bam -r name ./sorted/68IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/68IM.txt &
 htseq-count --stranded=reverse -f bam -r name ./sorted/84IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/84IM.txt &
 htseq-count --stranded=reverse -f bam -r name ./sorted/102IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/102IM.txt &
 htseq-count --stranded=reverse -f bam -r name ./sorted/113IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/113IM.txt &
+
+htseq-count --stranded=reverse -f bam -r name ./sorted/68IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/68IM.txt &
 htseq-count --stranded=reverse -f bam -r name ./sorted/111IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/111IM.txt &
 htseq-count --stranded=reverse -f bam -r name ./sorted/125IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/125IM.txt &
 
