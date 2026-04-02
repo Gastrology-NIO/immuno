@@ -20,11 +20,11 @@ load_data_counts<- function(path_htseq, gene_no_count_save_file){
 }
   
 load_DGE <- function(metadata, folder){
-  files<-sapply(metadata_tmp$probe_name,function(x) paste0(folder,x,".txt"))
+  files<-sapply(metadata$probe_name,function(x) paste0(folder,x,".txt"))
   x <- readDGE(files, columns=c(1,2))
   samplenames<-sapply(colnames(x), function(x) strsplit(x, "/")[[1]][3])
   colnames(x) <- samplenames
-  x$samples$research <- metadata_tmp$research
+  x$samples$research <- metadata$research
   x$samples$s <- metadata_tmp$s
   return(x)
 }
