@@ -1,4 +1,4 @@
-
+library(edgeR)
 load_data_meta<- function(path_metadata){
   metadata<-read.csv(path_metadata, sep=";")
   metadata$probe_name<-gsub("S15156", "RNA_S15156", metadata$probe_name)
@@ -19,8 +19,8 @@ load_data_counts<- function(path_htseq, gene_no_count_save_file){
   return(experiments_all)
 }
   
-load_DGE <- function(metadata, folder= "./htseq/") {
-  files<-sapply(metadata_tmp$probe_name,function(x) paste0(folder",x,".txt"))
+load_DGE <- function(metadata, folder){
+  files<-sapply(metadata_tmp$probe_name,function(x) paste0(folder,x,".txt"))
   x <- readDGE(files, columns=c(1,2))
   samplenames<-sapply(colnames(x), function(x) strsplit(x, "/")[[1]][3])
   colnames(x) <- samplenames
