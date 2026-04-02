@@ -19,7 +19,7 @@ load_data_counts<- function(path_htseq, gene_no_count_save_file){
   return(experiments_all)
 }
   
-load_DGE <- function(metadata, folder= "./htseq/) {
+load_DGE <- function(metadata, folder= "./htseq/") {
   files<-sapply(metadata_tmp$probe_name,function(x) paste0(folder",x,".txt"))
   x <- readDGE(files, columns=c(1,2))
   samplenames<-sapply(colnames(x), function(x) strsplit(x, "/")[[1]][3])
@@ -27,4 +27,13 @@ load_DGE <- function(metadata, folder= "./htseq/) {
   x$samples$research <- metadata_tmp$research
   x$samples$s <- metadata_tmp$s
   return(x)
+}
+
+                      
+cut_metadata<-function(metadata, conditions){
+  for (i in 1:length(conditions)){
+    name=names(conditions)[i]
+    metadata<-metadata[metadata[,name] %in% conditions[name]]
+  }
+  return(metadata)
 }
