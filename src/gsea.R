@@ -8,10 +8,9 @@ BiocManager::install(organism, character.only = TRUE)
 library(organism, character.only = TRUE)
 
 
-
-runGSEA<-function(differetial){
-  original_gene_list <- top.table$logFC
-  names(original_gene_list) <- rownames(top.table)
+# original_gene_list <- top.table$logFC
+# names(original_gene_list) <- rownames(top.table)
+runGSEA<-function(original_gene_list){
   gene_list<-na.omit(original_gene_list)
   c = sort(gene_list, decreasing = TRUE)
   gse <- gseGO(geneList=gene_list, 
