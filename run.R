@@ -5,7 +5,25 @@ source("./src/load_data.R")
 metadata<-load_data_meta("./data/metadata_jag.csv")
 gene_counts<-load_data_counts("./htseq/", "./data/gene_counts.csv")
 
+
+
+
 # todo: dodać nazwy genów itd
+
+# 2 pobranie (NtproBNP==1, 0)
+conditions <- list(type=c('Pobranie 1', 'kontrola'))
+metadata_0_analyse <- cut_metadata(metadata, conditions)
+metadata_0_analyse$research<-metadata_0_analyse$type
+metadata_0_analyse$research[metadata_0_analyse$type=='kontrola']<-"Control"
+metadata_0_analyse$research[metadata_0_analyse$type=='Pobranie 1']<-"Searched"
+metadata_0_analyse<- metadata_0_analyse[metadata_0_analyse$probe_name != "",]
+
+x<-load_DGE(metadata_0_analyse,  "./htseq/") 
+output_file<-"./result/pobranie1_vs_kontrola.csv"
+run_0<-run_limma(x, metadata_0_analyse, output_file)
+length(which(run_0$adj.P.Val < 0.05))
+
+
 # 1 pobranie (3 miesiące vs powyżej 2 lat)
 conditions <- list(type='Pobranie 1', 'time.of.OS'=c('poni\xbfej 3 miesi\xeacy', '> 2 lata'))
 metadata_1_analyse <- cut_metadata(metadata, conditions)
@@ -55,8 +73,32 @@ metadata_4_analyse$research<-metadata_4_analyse$type
 metadata_4_analyse$research[metadata_4_analyse$research=='Pobranie 1']<-"Control"
 metadata_4_analyse$research[metadata_4_analyse$research=='Pobranie 2']<-"Searched"
 metadata_4_analyse<- metadata_4_analyse[metadata_4_analyse$probe_name != "",]
-metadata_4_analyse<- metadata_4_analyse[!c(metadata_4_analyse$probe_name %in% c("117IM","45IM","46IM", "54IM", "63IM", "68IM", "84IM", "102IM", "113IM", "111IM", "125IM")),]
+metadata_4_analyse<- metadata_4_analyse[!c(metadata_4_analyse$probe_name %in% c("117IM","68IM", "63IM")),]
 # "46IM", "54IM", "63IM", "68IM", "84IM", "102IM", "113IM", "111IM", "125IM"
+
+
+x<-load_DGE(metadata_4_analyse,  "./htseq/") 
+output_file<-"./result/NtproBNP_1_pobranie_vs_2_pobranie.csv"
+run_4<-run_limma(x, metadata_4_analyse, output_file)
+length(which(run_4$adj.P.Val < 0.05))
+
+
+# 2 pobranie (NtproBNP==1, 0)
+conditions <- list(type='Pobranie 2', 'wzrost.NtproBNP'=c(0,1))
+metadata_5_analyse <- cut_metadata(metadata, conditions)
+metadata_5_analyse$research<-metadata_5_analyse$'wzrost.NtproBNP'
+metadata_5_analyse$research[metadata_5_analyse$research=='0']<-"Control"
+metadata_5_analyse$research[metadata_5_analyse$research=='1']<-"Searched"
+metadata_5_analyse<- metadata_5_analyse[metadata_5_analyse$probe_name != "",]
+metadata_5_analyse<- metadata_5_analyse[!c(metadata_5_analyse$probe_name %in% c("117IM","68IM", "63IM")),]
+
+x<-load_DGE(metadata_5_analyse,  "./htseq/") 
+output_file<-"./result/pobranie2_NtproBNP_1_vs_0.csv"
+run_4<-run_limma(x, metadata_5_analyse, output_file)
+length(which(run_4$adj.P.Val < 0.05))
+
+
+
 samtools sort -n -o ./sorted/46IM.nameSorted.bam ./star/46IMAligned.sortedByCoord.out.bam &
 samtools sort -n -o ./sorted/54IM.nameSorted.bam ./star/54IMAligned.sortedByCoord.out.bam &
 samtools sort -n -o ./sorted/68IM.nameSorted.bam ./star/68IMAligned.sortedByCoord.out.bam &
@@ -76,22 +118,3 @@ htseq-count --stranded=reverse -f bam -r name ./sorted/113IM.nameSorted.bam ./re
 htseq-count --stranded=reverse -f bam -r name ./sorted/68IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/68IM.txt &
 htseq-count --stranded=reverse -f bam -r name ./sorted/111IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/111IM.txt &
 htseq-count --stranded=reverse -f bam -r name ./sorted/125IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/125IM.txt &
-
-x<-load_DGE(metadata_4_analyse,  "./htseq/") 
-output_file<-"./result/NtproBNP_1_pobranie_vs_2_pobranie.csv"
-run_4<-run_limma(x, metadata_4_analyse, output_file)
-length(which(run_4$adj.P.Val < 0.05))
-
-
-# 2 pobranie (NtproBNP==1, 0)
-conditions <- list(type='Pobranie 2', 'wzrost.NtproBNP'=c(0,1))
-metadata_5_analyse <- cut_metadata(metadata, conditions)
-metadata_5_analyse$research<-metadata_5_analyse$'wzrost.NtproBNP'
-metadata_5_analyse$research[metadata_5_analyse$research=='0']<-"Control"
-metadata_5_analyse$research[metadata_5_analyse$research=='1']<-"Searched"
-metadata_5_analyse<- metadata_5_analyse[metadata_5_analyse$probe_name != "",]
-x<-load_DGE(metadata_5_analyse,  "./htseq/") 
-output_file<-"./result/pobranie2_NtproBNP_1_vs_0.csv"
-run_4<-run_limma(x, metadata_5_analyse, output_file)
-length(which(run_4$adj.P.Val < 0.05))
-
