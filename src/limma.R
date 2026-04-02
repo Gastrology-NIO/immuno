@@ -9,7 +9,7 @@ run_limma<-function(x, metadata, output_file){
     d0<-x[keep,]
     y <- voom(d0 , mm, plot = F)
     fit <- lmFit(y, mm)
-    contr <- makeContrasts(researchContol, levels = colnames(coef(fit)))
+    contr <- makeContrasts(researchSearched, levels = colnames(coef(fit)))
     tmp <- contrasts.fit(fit, contr)
     tmp <- eBayes(tmp)
     top.table <- topTable(tmp, sort.by = "P", n = Inf)
