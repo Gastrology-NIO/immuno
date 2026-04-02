@@ -12,4 +12,5 @@ run_limma<-function(x, output_file){
     tmp <- eBayes(tmp)
     top.table <- topTable(tmp, sort.by = "P", n = Inf)
     write.csv2(top.table, output_file)
+    return(top.table)
 }
