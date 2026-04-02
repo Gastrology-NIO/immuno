@@ -33,7 +33,7 @@ load_DGE <- function(metadata, folder){
 cut_metadata<-function(metadata, conditions){
   for (i in 1:length(conditions)){
     name=names(conditions)[i]
-    metadata<-metadata[metadata[,name] %in% conditions[name],]
+    metadata<-metadata[metadata[,name] %in% conditions[name][[1]],]
   }
   return(metadata)
 }
