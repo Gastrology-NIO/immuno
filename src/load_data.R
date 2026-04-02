@@ -1,7 +1,6 @@
 
 load_data_meta<- function(path_metadata){
   metadata<-read.csv(path_metadata, sep=";")
-  #metadata_tmp<-metadata[c(metadata$type %in% c("Pobranie1", "kontrola")),]
   metadata$probe_name<-gsub("S15156", "RNA_S15156", metadata$probe_name)
   return(metadata)
 }
@@ -20,12 +19,12 @@ load_data_counts<- function(path_htseq, gene_no_count_save_file){
   return(experiments_all)
 }
   
-cut_metadata<-function(metadata, conditions){
-  for (i in 1:length(conditions)){
-    print(i)
-    df[df[,c("sample_type")]  %in% c("skora"),]
-    name=names(conditions)[i]
-    metadata<-metadata[metadata[,name] %in% conditions[name]]
-  }
-  return(metadata)
+load_DGE <- function(metadata, folder= "./htseq/) {
+  files<-sapply(metadata_tmp$probe_name,function(x) paste0(folder",x,".txt"))
+  x <- readDGE(files, columns=c(1,2))
+  samplenames<-sapply(colnames(x), function(x) strsplit(x, "/")[[1]][3])
+  colnames(x) <- samplenames
+  x$samples$research <- metadata_tmp$research
+  x$samples$s <- metadata_tmp$s
+  return(x)
 }
