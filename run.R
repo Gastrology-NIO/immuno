@@ -94,10 +94,10 @@ metadata_5_analyse<- metadata_5_analyse[!c(metadata_5_analyse$probe_name %in% c(
 
 x<-load_DGE(metadata_5_analyse,  "./htseq/") 
 output_file<-"./result/pobranie2_NtproBNP_1_vs_0.csv"
-run_4<-run_limma(x, metadata_5_analyse, output_file)
-length(which(run_4$adj.P.Val < 0.05))
-
-
+run_5<-run_limma(x, metadata_5_analyse, output_file)
+length(which(run_5$adj.P.Val < 0.05))
+result<-add_genes_info(run_5)
+write.csv2(resuslt, "./result/pobranie2_NtproBNP_1_vs_0_with_genes.csv")
 
 samtools sort -n -o ./sorted/46IM.nameSorted.bam ./star/46IMAligned.sortedByCoord.out.bam &
 samtools sort -n -o ./sorted/54IM.nameSorted.bam ./star/54IMAligned.sortedByCoord.out.bam &
