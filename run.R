@@ -124,9 +124,13 @@ write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_result_result_sign
 
 
 result_significant_down<-result_significant[result_significant$logFC < 0,]
-enrich<-enrichGO(result_significant_down)
+enrich<-enrichGO(result_significant_down, "BP")
 enrich<- as.data.frame(enrich)
-write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_result_result_significant_down.csv")
+write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_result_result_significant_down_BP.csv")
+
+enrich<-enrichGO(result_significant_down, "MF")
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_result_result_significant_down_MF.csv")
 
 samtools sort -n -o ./sorted/46IM.nameSorted.bam ./star/46IMAligned.sortedByCoord.out.bam &
 samtools sort -n -o ./sorted/54IM.nameSorted.bam ./star/54IMAligned.sortedByCoord.out.bam &
