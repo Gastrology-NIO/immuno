@@ -83,6 +83,9 @@ run_4<-run_limma(x, metadata_4_analyse, output_file)
 length(which(run_4$adj.P.Val < 0.05))
 
 
+GeneRatio	BgRatio	RichFactor	FoldEnrichment	zScore
+
+
 # 2 pobranie (NtproBNP==1, 0)
 conditions <- list(type='Pobranie 2', 'wzrost.NtproBNP'=c(0,1))
 metadata_5_analyse <- cut_metadata(metadata, conditions)
@@ -97,7 +100,33 @@ output_file<-"./result/pobranie2_NtproBNP_1_vs_0.csv"
 run_5<-run_limma(x, metadata_5_analyse, output_file)
 length(which(run_5$adj.P.Val < 0.05))
 result<-add_genes_info(run_5)
-write.csv2(resuslt, "./result/pobranie2_NtproBNP_1_vs_0_with_genes.csv")
+result_fixed <- result |>
+  mutate(across(where(is.list), ~ sapply(., paste, collapse = ";")))
+write.csv2(result_fixed, "./result/pobranie2_NtproBNP_1_vs_0_with_genes.csv")
+
+enrich<-enrichGO(result$Row.names)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich.csv")
+
+result_significant<-result[result$adj.P.Val<0.05,]
+enrich<-enrichGO(result_significant)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_result_significant.csv")
+
+
+
+
+result_significant_up<-result_significant[result_significant$logFC>0,]
+enrich<-enrichGO(result_significant_up)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_result_result_significant_up.csv")
+
+
+
+result_significant_down<-result_significant[result_significant$logFC < 0,]
+enrich<-enrichGO(result_significant_down)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_result_result_significant_down.csv")
 
 samtools sort -n -o ./sorted/46IM.nameSorted.bam ./star/46IMAligned.sortedByCoord.out.bam &
 samtools sort -n -o ./sorted/54IM.nameSorted.bam ./star/54IMAligned.sortedByCoord.out.bam &
