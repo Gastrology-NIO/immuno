@@ -37,7 +37,8 @@ cut_metadata<-function(metadata, conditions){
   }
   return(metadata)
 }
-
+library(AnnotationHub)
+library(ensembldb)
 
 add_genes_info<-function(data){
   gene_symbols<-rownames(data)
@@ -77,12 +78,11 @@ add_genes_info<-function(data){
   # final_results<-merge(geny_roznicujace_plec, new_res, by.x="Gene.Symbol", by.y='hgnc_symbol.x', all=TRUE)
   # final_results<-merge(final_type, final_results, by.x="Row.names", by.y='ensembl_gene_id', all=T)
 
-  gene_symbols<-rownames(run_4)
   ah <- AnnotationHub()
   query(ah, c("Homo sapiens", "EnsDb"))
   edb <- ah[["AH119325"]]
   genes <- genes(edb, filter = GeneIdFilter(gene_symbols))
   genes<-as.data.frame(genes)
-  data<-merge(genes, data)
+  data<-merge(genes, data, by=0)
   return(data)
 }
