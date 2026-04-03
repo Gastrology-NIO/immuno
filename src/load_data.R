@@ -41,49 +41,12 @@ library(AnnotationHub)
 library(ensembldb)
 
 add_genes_info<-function(data){
-  gene_symbols<-data$Row.names
-
-  
-  # ensembl <- useEnsembl(biomart = "genes", mirror = "uswest")
-  # ensembl <- useDataset("hsapiens_gene_ensembl", mart = ensembl)
-
-  
-  # results <- getBM(attributes = c("external_gene_name", "ensembl_gene_id", "chromosome_name","transcript_biotype"),
-  #                 filters = "external_gene_name",
-  #                 values = gene_symbols,
-  #                 mart = ensembl)
-  # ensembl <- useDataset("hsapiens_gene_ensembl", mart = ensembl)
-  
-  # results <- getBM(attributes = c("external_gene_name", "ensembl_gene_id", "chromosome_name","transcript_biotype"),
-  #                 filters = "external_gene_name",
-  #                 values = gene_symbols,
-  #                 mart = ensembl)
-  
-  # results <- getBM(attributes = c("ensembl_gene_id", "hgnc_symbol", "chromosome_name","transcript_biotype"), filters = "ensembl_gene_id", values = gene_symbols, mart = ensembl)    
-  
-  # rownames(final_type)<-final_type[,c("Row.names")]
-  
-  
-  # library(dplyr)
-  
-  # df_new <- aggregate(
-  #   transcript_biotype ~ ensembl_gene_id + hgnc_symbol + chromosome_name,
-  #   data = results,
-  #   FUN = function(x) paste(unique(x), collapse = ",")
-  # )
-  
-  # rownames(df_new) <- df_new[,1]
-  # protein_coding_genes<-results[results$transcript_biotype =="protein_coding",]
-  # new_res<-merge(df_new, protein_coding_genes, by="ensembl_gene_id", all=TRUE)
-  
-  # final_results<-merge(geny_roznicujace_plec, new_res, by.x="Gene.Symbol", by.y='hgnc_symbol.x', all=TRUE)
-  # final_results<-merge(final_type, final_results, by.x="Row.names", by.y='ensembl_gene_id', all=T)
-
+  gene_symbols<-rownames(data)
   ah <- AnnotationHub()
   query(ah, c("Homo sapiens", "EnsDb"))
   edb <- ah[["AH119325"]]
   genes <- genes(edb, filter = GeneIdFilter(gene_symbols))
-  genes<-as.data.frame(genes)
-  data<-merge(genes, data, by=0)
+  genes_info<-as.data.frame(genes)
+  data<-merge(genes_info, data, by=0)
   return(data)
 }
