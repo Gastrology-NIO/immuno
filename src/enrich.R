@@ -1,17 +1,24 @@
 library(clusterProfiler)
 library(org.Hs.eg.db)
-enrichGO<-function( genes,aspect="BP"){
+enrichGO<-function( data,aspect="BP"){
+  geneList <- data$logFC
+  names(geneList) <- data$Row.names
+
   # MF
   # BP
   # CC
-ego2 <- clusterProfiler::enrichGO(
-  gene         = genes,
-  OrgDb        = org.Hs.eg.db,
-  keyType      = "ENSEMBL",
-  ont          = aspect,
+ego <- clusterProfiler::enrichGO(
+  gene          = genes,
+  universe      = names(geneList),
+  OrgDb         = org.Hs.eg.db,
+  keyType       = "ENSEMBL",
+  ont           = aspect,
   pAdjustMethod = "BH",
-  pvalueCutoff  = 0.01,
-  qvalueCutoff  = 0.05
+  pvalueCutoff  = 0.05,
+  qvalueCutoff  = 0.2
 )
+  ego2 <- setReadable(ego, OrgDb = org.Hs.eg.db, keyType = "ENSEMBL")
+ego2 <- clusterProfiler::pairwise_termsim(ego2)
+ego2@result$logFC <- geneList[ego2@result$geneID]
     return(ego2)
   }
