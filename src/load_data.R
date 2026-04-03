@@ -41,7 +41,8 @@ library(AnnotationHub)
 library(ensembldb)
 
 add_genes_info<-function(data){
-  gene_symbols<-rownames(data)
+  gene_symbols<-data$Row.names
+
   
   # ensembl <- useEnsembl(biomart = "genes", mirror = "uswest")
   # ensembl <- useDataset("hsapiens_gene_ensembl", mart = ensembl)
