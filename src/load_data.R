@@ -5,11 +5,11 @@ load_data_meta<- function(path_metadata){
   return(metadata)
 }
 
-load_data_counts<- function(path_htseq, gene_no_count_save_file){
+load_data_counts<- function(path_htseq, gene_no_count_save_file, metadata){
   experiments_all<-data.frame()
-  experiments_all<-read.csv(paste(path_htseq,metadata_tmp$probe_name[1], ".txt", sep=""),header=FALSE, sep="\t")
-  names(experiments_all)<-c('gene', metadata_tmp$probe_name[1])
-  for (i in metadata_tmp$probe_name[2:length(metadata_tmp$probe_name)]){
+  experiments_all<-read.csv(paste(path_htseq,metadata$probe_name[1], ".txt", sep=""),header=FALSE, sep="\t")
+  names(experiments_all)<-c('gene', metadata$probe_name[1])
+  for (i in metadata$probe_name[2:length(metadata$probe_name)]){
     exp_id<-i
     experiments<-read.csv(paste(path_htseq,i, ".txt", sep=""),header=FALSE, sep="\t")
     names(experiments)<-c('gene', exp_id)
