@@ -1,4 +1,18 @@
 
+add_genes_info <- function(data){
+  gene_symbols<-data$Row.names
+  ah <- AnnotationHub()
+  query(ah, c("Homo sapiens", "EnsDb"))
+  edb <- ah[["AH119325"]]
+  genes <- genes(edb, filter = GeneIdFilter(gene_symbols))
+  genes<-as.data.frame(genes)
+  data<-merge(genes, data, by=0)
+  return(data)
+}
+
+
+
+
 source("./src/load_data.R")
 
 
