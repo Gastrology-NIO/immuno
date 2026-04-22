@@ -138,19 +138,37 @@ length(which(run_6$adj.P.Val < 0.05))
 
 # 3,4 pobranie (NtproBNP==1, 0)
 
-conditions <- list(type=c('Pobranie 3', 'Pobranie 4'), 'wzrost.NtproBNP'=c(0,1))
+conditions <- list(type=c('Pobranie 2','Pobranie 3', 'Pobranie 4'), 'wzrost.NtproBNP'=c(0,1))
 metadata_7_analyse <- cut_metadata(metadata, conditions)
 metadata_7_analyse$research<-metadata_7_analyse$'wzrost.NtproBNP'
 metadata_7_analyse$research[metadata_7_analyse$research=='0']<-"Control"
 metadata_7_analyse$research[metadata_7_analyse$research=='1']<-"Searched"
 metadata_7_analyse<- metadata_7_analyse[metadata_7_analyse$probe_name != "",]
-
-
+metadata_7_analyse<- metadata_7_analyse[!c(metadata_7_analyse$probe_name %in% c("119IM", "53IM", "90IM", "91IM", "63IM", '68IM', '117IM')),]
 
 x<-load_DGE(metadata_7_analyse,  "./htseq/") 
 output_file<-"./result/pobranie1_NtproBNP_1_vs_0_with_genes.csv"
 run_7<-run_limma(x, metadata_7_analyse, output_file)
 length(which(run_7$adj.P.Val < 0.05))
+
+
+
+
+conditions <- list(type=c('Pobranie 3', 'Pobranie 4'), 'wzrost.NtproBNP'=c(0,1))
+metadata_8_analyse <- cut_metadata(metadata, conditions)
+metadata_8_analyse$research<-metadata_8_analyse$'wzrost.NtproBNP'
+metadata_8_analyse$research[metadata_8_analyse$research=='0']<-"Control"
+metadata_8_analyse$research[metadata_8_analyse$research=='1']<-"Searched"
+metadata_8_analyse<- metadata_8_analyse[metadata_8_analyse$probe_name != "",]
+metadata_8_analyse<- metadata_8_analyse[!c(metadata_8_analyse$probe_name %in% c("119IM", "53IM", "90IM", "91IM", "63IM", '68IM', '117IM')),]
+
+x<-load_DGE(metadata_8_analyse,  "./htseq/") 
+output_file<-"./result/pobranie_3_4_NtproBNP_1_vs_0_with_genes.csv"
+run_8<-run_limma(x, metadata_8_analyse, output_file)
+length(which(run_8$adj.P.Val < 0.05))
+
+
+
 
 x<-load_DGE(metadata_5_analyse,  "./htseq/") 
 output_file<-"./result/pobranie2_NtproBNP_1_vs_0.csv"
@@ -189,6 +207,17 @@ enrich<-enrichGO(result_significant_down, "MF")
 enrich<- as.data.frame(enrich)
 write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_result_result_significant_down_MF.csv")
 
+tmp<-merge(run_5[which(run_5$adj.P.Val < 0.05),],run_6, by=0)
+colnames(tmp)<-c("Row.names_0",paste0(colnames(run_5), "_pobr2"),paste0(colnames(run_6), "_pobr1"))
+rownames(tmp)<-tmp$Row.names_0
+tmp<-merge(tmp,run_8, by=0)
+rownames(tmp)<-tmp$Row.names
+colnames(tmp)<-c("Row.names_0", "Row.names_1",paste0(colnames(run_5), "_pobr2"),paste0(colnames(run_6), "_pobr1"),paste0(colnames(run_6), "_pobr3_4"))
+tmp<-merge(tmp,run_7, by=0)
+rownames(tmp)<-tmp$Row.names
+colnames(tmp)<-c("Row.names_0", "Row.names_1", "Row.names_2",paste0(colnames(run_5), "_pobr2"),paste0(colnames(run_6), "_pobr1"),paste0(colnames(run_6), "_pobr3_4"),paste0(colnames(run_6), "_pobr2_3_4"))
+
+
 samtools sort -n -o ./sorted/46IM.nameSorted.bam ./star/46IMAligned.sortedByCoord.out.bam &
 samtools sort -n -o ./sorted/54IM.nameSorted.bam ./star/54IMAligned.sortedByCoord.out.bam &
 samtools sort -n -o ./sorted/68IM.nameSorted.bam ./star/68IMAligned.sortedByCoord.out.bam &
@@ -208,3 +237,9 @@ htseq-count --stranded=reverse -f bam -r name ./sorted/113IM.nameSorted.bam ./re
 htseq-count --stranded=reverse -f bam -r name ./sorted/68IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/68IM.txt &
 htseq-count --stranded=reverse -f bam -r name ./sorted/111IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/111IM.txt &
 htseq-count --stranded=reverse -f bam -r name ./sorted/125IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/125IM.txt &
+
+
+
+samtools sort -n -o ./sorted/91IM.nameSorted.bam ./star/91IMAligned.sortedByCoord.out.bam &
+htseq-count --stranded=reverse -f bam -r name ./sorted/91IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/91IM.txt &
+
