@@ -91,6 +91,7 @@ metadata_4_analyse<- metadata_4_analyse[!c(metadata_4_analyse$probe_name %in% c(
 # "46IM", "54IM", "63IM", "68IM", "84IM", "102IM", "113IM", "111IM", "125IM"
 
 
+
 x<-load_DGE(metadata_4_analyse,  "./htseq/") 
 output_file<-"./result/NtproBNP_1_pobranie_vs_2_pobranie.csv"
 run_4<-run_limma(x, metadata_4_analyse, output_file)
@@ -108,6 +109,48 @@ metadata_5_analyse$research[metadata_5_analyse$research=='0']<-"Control"
 metadata_5_analyse$research[metadata_5_analyse$research=='1']<-"Searched"
 metadata_5_analyse<- metadata_5_analyse[metadata_5_analyse$probe_name != "",]
 metadata_5_analyse<- metadata_5_analyse[!c(metadata_5_analyse$probe_name %in% c("117IM","68IM", "63IM")),]
+
+
+x<-load_DGE(metadata_5_analyse,  "./htseq/") 
+output_file<-"./result/pobranie2_NtproBNP_1_vs_0.csv"
+run_5<-run_limma(x, metadata_5_analyse, output_file)
+length(which(run_5$adj.P.Val < 0.05))
+result<-add_genes_info(run_5)
+result_fixed <- result |>
+  mutate(across(where(is.list), ~ sapply(., paste, collapse = ";")))
+write.csv2(result_fixed, "./result/pobranie2_NtproBNP_1_vs_0_with_genes.csv")
+
+# 1 pobranie (NtproBNP==1, 0)
+
+conditions <- list(type='Pobranie 1', 'wzrost.NtproBNP'=c(0,1))
+metadata_6_analyse <- cut_metadata(metadata, conditions)
+metadata_6_analyse$research<-metadata_6_analyse$'wzrost.NtproBNP'
+metadata_6_analyse$research[metadata_6_analyse$research=='0']<-"Control"
+metadata_6_analyse$research[metadata_6_analyse$research=='1']<-"Searched"
+metadata_6_analyse<- metadata_6_analyse[metadata_6_analyse$probe_name != "",]
+metadata_6_analyse<- metadata_6_analyse[!c(metadata_6_analyse$probe_name %in% c("117IM","68IM", "63IM")),]
+
+
+x<-load_DGE(metadata_6_analyse,  "./htseq/") 
+output_file<-"./result/pobranie1_NtproBNP_1_vs_0_with_genes.csv"
+run_6<-run_limma(x, metadata_6_analyse, output_file)
+length(which(run_6$adj.P.Val < 0.05))
+
+# 3,4 pobranie (NtproBNP==1, 0)
+
+conditions <- list(type=c('Pobranie 3', 'Pobranie 4'), 'wzrost.NtproBNP'=c(0,1))
+metadata_7_analyse <- cut_metadata(metadata, conditions)
+metadata_7_analyse$research<-metadata_7_analyse$'wzrost.NtproBNP'
+metadata_7_analyse$research[metadata_7_analyse$research=='0']<-"Control"
+metadata_7_analyse$research[metadata_7_analyse$research=='1']<-"Searched"
+metadata_7_analyse<- metadata_7_analyse[metadata_7_analyse$probe_name != "",]
+
+
+
+x<-load_DGE(metadata_7_analyse,  "./htseq/") 
+output_file<-"./result/pobranie1_NtproBNP_1_vs_0_with_genes.csv"
+run_7<-run_limma(x, metadata_7_analyse, output_file)
+length(which(run_7$adj.P.Val < 0.05))
 
 x<-load_DGE(metadata_5_analyse,  "./htseq/") 
 output_file<-"./result/pobranie2_NtproBNP_1_vs_0.csv"
