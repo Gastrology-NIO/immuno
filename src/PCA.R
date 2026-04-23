@@ -1,13 +1,13 @@
 
 
 
-plotPCA<-function(x, save_path){
+plotPCA<-function(x,metadata, save_path){
   mds <- plotMDS(x, plot = FALSE)
 
   df <- data.frame(
     Dim1 = mds$x,
     Dim2 = mds$y,
-    group = research
+    group = metadata$research
   )
   
   library(ggplot2)
