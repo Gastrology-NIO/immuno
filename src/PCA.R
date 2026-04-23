@@ -7,14 +7,18 @@ plotPCA<-function(x,metadata, save_path){
   df <- data.frame(
     Dim1 = mds$x,
     Dim2 = mds$y,
-    group = metadata$research
+    group = metadata$research, 
+    label = metadata$probe_name,
+        s = metadata$s
+
   )
   
   library(ggplot2)
   
-  p<-ggplot(df, aes(Dim1, Dim2, color = group)) +
-    geom_point(size = 4) +
-    theme_minimal()
+p <- ggplot(df, aes(Dim1, Dim2, color = s)) +
+  geom_point(size = 4) +
+  geom_text(aes(label = label), vjust = -0.5) +
+  theme_minimal()
 
     ggsave(
     save_path,
