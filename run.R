@@ -98,9 +98,6 @@ run_4<-run_limma(x, metadata_4_analyse, output_file)
 length(which(run_4$adj.P.Val < 0.05))
 
 
-GeneRatio	BgRatio	RichFactor	FoldEnrichment	zScore
-
-
 # 2 pobranie (NtproBNP==1, 0)
 conditions <- list(type='Pobranie 2', 'wzrost.NtproBNP'=c(0,1))
 metadata_5_analyse <- cut_metadata(metadata, conditions)
@@ -108,17 +105,51 @@ metadata_5_analyse$research<-metadata_5_analyse$'wzrost.NtproBNP'
 metadata_5_analyse$research[metadata_5_analyse$research=='0']<-"Control"
 metadata_5_analyse$research[metadata_5_analyse$research=='1']<-"Searched"
 metadata_5_analyse<- metadata_5_analyse[metadata_5_analyse$probe_name != "",]
-metadata_5_analyse<- metadata_5_analyse[!c(metadata_5_analyse$probe_name %in% c("117IM","68IM", "63IM")),]
+metadata_5_analyse<- metadata_5_analyse[!c(metadata_5_analyse$probe_name %in% c("68IM","63IM")),]
+x<-load_DGE(metadata_5_analyse,  "./htseq2/") 
+y<-get_voom(x, metadata_5_analyse)
+res<-test(metadata_5_analyse, y)
 
-
-x<-load_DGE(metadata_5_analyse,  "./htseq/") 
-output_file<-"./result/pobranie2_NtproBNP_1_vs_0.csv"
+x<-load_DGE(metadata_5_analyse,  "./htseq2/") 
+# x <- calcNormFactors(x)
 run_5<-run_limma(x, metadata_5_analyse, output_file)
 length(which(run_5$adj.P.Val < 0.05))
+
+common <- intersect(rownames(run_5), rownames(run_5_no_68))
+length(common)
+
+
+pdf("sensitivity_analysis_68IM.pdf", width = 7, height = 7)
+
+plot(run_5[common, "logFC"],
+     run_5_no_68[common, "logFC"],
+     xlab = "logFC full",
+     ylab = "logFC no 68IM")
+
+abline(0,1,col="red")
+dev.off()
+
+cor(run_5[common, "logFC"],
+    run_5_no_68[common, "logFC"])
+
+
+
+sig_full <- rownames(run_5)[run_5$adj.P.Val < 0.05]
+sig_no68 <- rownames(run_5_no_68)[run_5_no_68$adj.P.Val < 0.05]
+
+length(setdiff(sig_full, sig_no68))
+length(setdiff(sig_no68, sig_full))
+
+
+
+tmp<-merge(run_5[which(run_5$adj.P.Val < 0.05),], count_5, by=0)
+write.csv2(tmp, "run_5.csv")
+
 result<-add_genes_info(run_5)
 result_fixed <- result |>
   mutate(across(where(is.list), ~ sapply(., paste, collapse = ";")))
 write.csv2(result_fixed, "./result/pobranie2_NtproBNP_1_vs_0_with_genes.csv")
+
 
 # 1 pobranie (NtproBNP==1, 0)
 
@@ -146,7 +177,7 @@ metadata_7_analyse$research[metadata_7_analyse$research=='1']<-"Searched"
 metadata_7_analyse<- metadata_7_analyse[metadata_7_analyse$probe_name != "",]
 metadata_7_analyse<- metadata_7_analyse[!c(metadata_7_analyse$probe_name %in% c("119IM", "53IM", "90IM", "91IM", "63IM", '68IM', '117IM')),]
 
-x<-load_DGE(metadata_7_analyse,  "./htseq/") 
+x<-load_DGE(metadata_7_analyse,  "./htseq2/") 
 output_file<-"./result/pobranie1_NtproBNP_1_vs_0_with_genes.csv"
 run_7<-run_limma(x, metadata_7_analyse, output_file)
 length(which(run_7$adj.P.Val < 0.05))
@@ -162,7 +193,11 @@ metadata_8_analyse$research[metadata_8_analyse$research=='1']<-"Searched"
 metadata_8_analyse<- metadata_8_analyse[metadata_8_analyse$probe_name != "",]
 metadata_8_analyse<- metadata_8_analyse[!c(metadata_8_analyse$probe_name %in% c("119IM", "53IM", "90IM", "91IM", "63IM", '68IM', '117IM')),]
 
-x<-load_DGE(metadata_8_analyse,  "./htseq/") 
+x<-load_DGE(metadata_8_analyse,  "./htseq2/") 
+
+  files<-sapply(metadata_8_analyse$probe_name,function(x) paste0(folder,x,".txt"))
+
+                
 output_file<-"./result/pobranie_3_4_NtproBNP_1_vs_0_with_genes.csv"
 run_8<-run_limma(x, metadata_8_analyse, output_file)
 length(which(run_8$adj.P.Val < 0.05))
@@ -243,3 +278,75 @@ htseq-count --stranded=reverse -f bam -r name ./sorted/125IM.nameSorted.bam ./re
 samtools sort -n -o ./sorted/91IM.nameSorted.bam ./star/91IMAligned.sortedByCoord.out.bam &
 htseq-count --stranded=reverse -f bam -r name ./sorted/91IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/91IM.txt &
 
+
+
+
+                
+output_file<-"./result/pobranie2_NtproBNP_1_vs_0.csv"
+y<-get_voom(x, metadata_5_analyse)
+plotPCA(y,metadata_5_analyse, "tmp.svg")
+Metadata_5_analyse[metadata_5_analyse$probe_name %in% c("130IM", "78IM", "123IM", "96IM", "111IM", "95IM", "87IM", "95IM", "33IM", "110IM", "102IM", "46IM"),]
+control<-metadata_5_analyse$probe_name[!c(metadata_5_analyse$probe_name %in% c("130IM", "78IM", "123IM", "96IM", "111IM", "95IM", "87IM", "95IM", "33IM", "110IM", "102IM", "46IM"))] 
+searched<-c("130IM", "78IM", "123IM", "96IM", "111IM", "95IM", "87IM", "95IM", "33IM", "110IM", "102IM", "46IM")
+
+metadata_5_analyse$research[metadata_5_analyse$probe_name %in% control]<-"Control"
+metadata_5_analyse$research[metadata_5_analyse$probe_name %in% searched]<-"Searched"
+pdf("MDS_sex.pdf", width = 7, height = 6)
+plotMDS(y, col = as.numeric(as.factor(metadata_5_analyse$s)))
+dev.off()
+
+pdf("MDS_research.png", width = 7, height = 6)
+plotMDS(y, col = as.numeric(as.factor(metadata_5_analyse$research)))
+dev.off()
+
+
+png("MDS_research.png", width = 800, height = 600)
+plotMDS(y, col = as.factor(metadata_5_analyse$research))
+dev.off()
+
+mds <- plotMDS(y, plot = FALSE)
+mds$var.explained
+df <- data.frame(
+  Dim1 = mds$x,
+  Dim2 = mds$y,
+  sex = metadata_5_analyse$s,
+  research = metadata_5_analyse$research
+)
+pca <- prcomp(t(y$E))
+
+p1<-plot(pca$x[,1], pca$x[,2], col = as.factor(metadata_5_analyse$s))
+p2<-plot(pca$x[,1], pca$x[,2], col = as.factor(metadata_5_analyse$research))
+
+ggsave("p1.png",
+       plot = p1,
+       width = 8,
+       height = 6,
+       dpi = 100)
+
+ggsave("p2.png",
+       plot = p2,
+       width = 8,
+       height = 6,
+       dpi = 100)
+
+
+v_adj <- removeBatchEffect(y, covariates = model.matrix(~ s, data = metadata_5_analyse))
+pdf("MDS_research.png", width = 7, height = 6)
+
+plotMDS(v_adj, col = as.numeric(as.factor(metadata_5_analyse$research)))
+dev.off()
+
+
+
+
+
+                metadata_5_analyse<- metadata_5_analyse[!c(metadata_5_analyse$probe_name %in% c("63IM")),]
+
+x<-load_DGE(metadata_5_analyse,  "./htseq2/") 
+x$samples$lib.size
+y<-get_voom(x, metadata_5_analyse)
+count_5<-as.data.frame(x$counts)
+
+                
+
+                
