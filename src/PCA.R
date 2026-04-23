@@ -1,7 +1,7 @@
 
 
 
-plotPCA<function(x, save_path){
+plotPCA<-function(x, save_path){
   mds <- plotMDS(x, plot = FALSE)
 
   df <- data.frame(
