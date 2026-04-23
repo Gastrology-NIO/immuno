@@ -35,53 +35,80 @@ sensitivity_limma <- function(v, metadata, outlier, design_formula = ~ s + resea
   # 1. INDEX OUTLIERA
   # ----------------------------
   keep <- metadata$probe_name != outlier
-
+  
   v_full <- v
   v_sub  <- v[, keep]
-
+  
   meta_full <- metadata
   meta_sub  <- metadata[keep, ]
-
+  
   # ----------------------------
   # 2. DESIGN MATRICES
   # ----------------------------
   design_full <- model.matrix(design_formula, data = meta_full)
   design_sub  <- model.matrix(design_formula, data = meta_sub)
-
+  
   # ----------------------------
-  # 3. FIT MODELS
+  # 3. FIT MODELS (limma)
   # ----------------------------
   fit_full <- lmFit(v_full, design_full)
-  fit_full <- eBayes(fit_full)
-  res_full <- topTable(fit_full, number = Inf)
-
+  contr <- makeContrasts(researchSearched, levels = colnames(coef(fit_full)))
+  fit_full <- eBayes(contrasts.fit(fit_full, contr))
+  res_full <- topTable(fit_full, number = Inf, sort.by = "none")
+  
   fit_sub <- lmFit(v_sub, design_sub)
-  fit_sub <- eBayes(fit_sub)
-  res_sub <- topTable(fit_sub, number = Inf)
-
+  contr <- makeContrasts(researchSearched, levels = colnames(coef(fit_sub)))
+  fit_sub <- eBayes(contrasts.fit(fit_sub, contr))
+  res_sub <- topTable(fit_sub, number = Inf, sort.by = "none")
+  
   # ----------------------------
   # 4. COMMON GENES
   # ----------------------------
   common <- intersect(rownames(res_full), rownames(res_sub))
-
+  
   # ----------------------------
   # 5. STABILITY METRICS
   # ----------------------------
-  logfc_cor <- cor(
-    res_full[common, "logFC"],
-    res_sub[common, "logFC"]
-  )
-
+  x <- res_full[common, "logFC"]
+  y <- res_sub[common, "logFC"]
+  
+  ok <- is.finite(x) & is.finite(y)
+  
+  logfc_cor <- cor(x[ok], y[ok])
+  
   sig_full <- rownames(res_full)[res_full$adj.P.Val < 0.05]
   sig_sub  <- rownames(res_sub)[res_sub$adj.P.Val < 0.05]
-
+  
   overlap_deg <- length(intersect(sig_full, sig_sub))
+  deg_loss <- length(sig_full) - overlap_deg
+  
+  # ----------------------------
+  # 6. MDS SHIFT (INFLUENCE COMPONENT)
+  # ----------------------------
+  mds_full <- plotMDS(v_full, plot = FALSE)
+  mds_sub  <- plotMDS(v_sub, plot = FALSE)
+
+  mds_dist <- sqrt(
+    (mean(mds_full$x) - mean(mds_sub$x))^2 +
+    (mean(mds_full$y) - mean(mds_sub$y))^2
+  )
+
 
   # ----------------------------
-  # 6. PLOT
+  # 7. INFLUENCE SCORE (PAPER-STYLE)
   # ----------------------------
-  plot(res_full[common, "logFC"],
-       res_sub[common, "logFC"],
+  max_deg_loss <- max(deg_loss, 1)
+logfc_diff <- abs(x - y)
+    influence_score <-
+  (1 - logfc_cor) +
+  mean(logfc_diff[is.finite(logfc_diff)])
+
+  # ----------------------------
+  # 8. PLOT
+  # ----------------------------
+  pdf(paste0("sensitivity_analysis_", outlier, ".pdf"), width = 7, height = 7)
+
+  plot(x[ok], y[ok],
        pch = 16, cex = 0.5,
        xlab = "Full model logFC",
        ylab = paste0("Without ", outlier, " logFC"),
@@ -89,27 +116,61 @@ sensitivity_limma <- function(v, metadata, outlier, design_formula = ~ s + resea
 
   abline(0,1,col="red")
 
+  dev.off()
+
   # ----------------------------
-  # 7. OUTPUT SUMMARY
+  # 9. OUTPUT
   # ----------------------------
   cat("\n============================\n")
-  cat("Sensitivity analysis for:", outlier, "\n")
+  cat("Sensitivity analysis:", outlier, "\n")
   cat("============================\n")
 
-  cat("Genes in full model:", nrow(res_full), "\n")
-  cat("Genes in reduced model:", nrow(res_sub), "\n")
+  cat("Genes full:", nrow(res_full), "\n")
+  cat("Genes reduced:", nrow(res_sub), "\n")
   cat("Correlation logFC:", round(logfc_cor, 3), "\n")
-  cat("Overlap DEGs:", overlap_deg, "\n")
-  cat("Unique to full:", length(setdiff(sig_full, sig_sub)), "\n")
-  cat("Unique to reduced:", length(setdiff(sig_sub, sig_full)), "\n")
+  cat("DEG overlap:", overlap_deg, "\n")
+  cat("DEG loss:", deg_loss, "\n")
+  cat("MDS shift:", round(mds_dist, 3), "\n")
+  cat("INFLUENCE SCORE:", round(influence_score, 3), "\n")
 
   # ----------------------------
-  # 8. RETURN RESULTS
+  # 10. RETURN
   # ----------------------------
   return(list(
     full = res_full,
     reduced = res_sub,
     correlation_logFC = logfc_cor,
-    overlap_DEG = overlap_deg
+    overlap_DEG = overlap_deg,
+    deg_loss = deg_loss,
+    mds_shift = mds_dist,
+    influence_score = influence_score
   ))
 }
+
+
+
+test<-function(metadata, y){
+results_list <- list()
+
+    for (probe in metadata$probe_name) {
+
+  cat("Processing:", probe, "\n")
+
+  res <- sensitivity_limma(y, metadata, probe)
+
+  results_list[[probe]] <- data.frame(
+    sample = probe,
+
+    logFC_cor = if (!is.null(res$correlation_logFC)) res$correlation_logFC else NA,
+    DEG_overlap = if (!is.null(res$overlap_DEG)) res$overlap_DEG else NA,
+    deg_loss = if (!is.null(res$deg_loss)) res$deg_loss else NA,
+
+    influence_score = if (!is.null(res$influence_score)) res$influence_score else NA
+  )
+}
+
+results <- do.call(rbind, results_list)
+
+return(results)
+}
+
