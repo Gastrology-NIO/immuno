@@ -24,7 +24,7 @@ gene_counts<-load_data_counts("./htseq/", "./data/gene_counts.csv")
 
 # todo: dodać nazwy genów itd
 
-# 2 pobranie (NtproBNP==1, 0)
+# 1 pobranie VS kontrola
 conditions <- list(type=c('Pobranie 1', 'kontrola'))
 metadata_0_analyse <- cut_metadata(metadata, conditions)
 metadata_0_analyse$research<-metadata_0_analyse$type
@@ -36,6 +36,19 @@ x<-load_DGE(metadata_0_analyse,  "./htseq/")
 output_file<-"./result/pobranie1_vs_kontrola.csv"
 run_0<-run_limma(x, metadata_0_analyse, output_file)
 length(which(run_0$adj.P.Val < 0.05))
+tmp<-run_0[run_0$adj.P.Val < 0.05,]
+tmp<-tmp[c(tmp$logFC < -1 | tmp$logFC >1),]
+nrow(tmp)
+
+
+run_0_deseq<-run_deseq2(x, metadata_0_analyse)
+run_0_deseq <- run_0_deseq[!is.na(run_0_deseq$padj),]
+length(which(run_0_deseq$padj < 0.05))
+
+write.csv2(run_0_deseq, "deseq_0.csv")
+tmp<-run_0_deseq[run_0_deseq$padj < 0.05,]
+tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
+nrow(tmp)
 
 
 # 1 pobranie (3 miesiące vs powyżej 2 lat)
@@ -49,6 +62,21 @@ output_file<-"./result/1pobranie_3miesiace_vs_powyżej_2_lata.csv"
 run_1<-run_limma(x, metadata_1_analyse, output_file)
 length(which(run_1$adj.P.Val < 0.05))
 
+tmp<-run_1[run_1$adj.P.Val < 0.05,]
+tmp<-tmp[c(tmp$logFC < -1 | tmp$logFC >1),]
+nrow(tmp)
+
+
+run_1_deseq<-run_deseq2(x, metadata_1_analyse)
+run_1_deseq <- run_1_deseq[!is.na(run_1_deseq$padj),]
+length(which(run_1_deseq$padj < 0.05))
+
+
+write.csv2(run_1_deseq, "deseq_1.csv")
+tmp<-run_1_deseq[run_1_deseq$padj < 0.05,]
+tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
+nrow(tmp)
+
 # 1 pobranie (I linia vs kolejna linia)
 conditions <- list(type='Pobranie 1', 'linia'=c('I linia', ''))
 metadata_2_analyse <- cut_metadata(metadata, conditions)
@@ -59,6 +87,14 @@ x<-load_DGE(metadata_2_analyse,  "./htseq/")
 output_file<-"./result/1pobranie_1_linia_vs_kolejne.csv"
 run_2<-run_limma(x, metadata_2_analyse, output_file)
 length(which(run_2$adj.P.Val < 0.05))
+run_2_deseq<-run_deseq2(x, metadata_2_analyse)
+run_2_deseq <- run_3_deseq[!is.na(run_2_deseq$padj),]
+length(which(run_2_deseq$padj < 0.05))
+
+write.csv2(run_2_deseq, "deseq_2.csv")
+tmp<-run_2_deseq[run_2_deseq$padj < 0.05,]
+tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
+nrow(tmp)
 
 # NtproBNP==0 (1 pobranie vs 2 pobranie)
 conditions <- list(type=c('Pobranie 1', 'Pobranie 2'), 'wzrost.NtproBNP'=0)
@@ -66,7 +102,7 @@ metadata_3_analyse <- cut_metadata(metadata, conditions)
 metadata_3_analyse$research<-metadata_3_analyse$type
 metadata_3_analyse$research[metadata_3_analyse$research=='Pobranie 1']<-"Control"
 metadata_3_analyse$research[metadata_3_analyse$research=='Pobranie 2']<-"Searched"
-metadata_3_analyse<- metadata_3_analyse[!c(metadata_3_analyse$probe_name %in% c("117IM","45IM")),]
+metadata_3_analyse<- metadata_3_analyse[!c(metadata_3_analyse$probe_name %in% c("41IM", "31IM","117IM","45IM")),]
 metadata_3_analyse[metadata_3_analyse$probe_name != "",] -> metadata_3_analyse
 # metadata_3_analyse<- metadata_3_analyse[!c(metadata_3_analyse$probe_name %in% c("123IM", "96IM",  "95IM", "107IM", "92IM" , "116IM", "117IM", "110IM", "130IM","27IM",
 # "34IM","36IM","33IM","39IM","43IM","35IM","64IM","45IM","72IM","47IM","49IM","66IM","61IM","78IM","70IM","87IM","94IM")),]
@@ -77,8 +113,14 @@ x<-load_DGE(metadata_3_analyse,  "./htseq/")
 output_file<-"./result/NtproBNP_0_pobranie_vs_2_pobranie.csv"
 run_3<-run_limma(x, metadata_3_analyse, output_file)
 length(which(run_3$adj.P.Val < 0.05))
+run_3_deseq<-run_deseq2(x, metadata_3_analyse)
+run_3_deseq <- run_3_deseq[!is.na(run_3_deseq$padj),]
+length(which(run_3_deseq$padj < 0.05))
 
-
+write.csv2(run_3_deseq, "deseq_3.csv")
+tmp<-run_3_deseq[run_3_deseq$padj < 0.05,]
+tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
+nrow(tmp)
 
 # NtproBNP==1 (1 pobranie vs 2 pobranie)
 conditions <- list(type=c('Pobranie 1', 'Pobranie 2'), 'wzrost.NtproBNP'=1)
@@ -87,7 +129,7 @@ metadata_4_analyse$research<-metadata_4_analyse$type
 metadata_4_analyse$research[metadata_4_analyse$research=='Pobranie 1']<-"Control"
 metadata_4_analyse$research[metadata_4_analyse$research=='Pobranie 2']<-"Searched"
 metadata_4_analyse<- metadata_4_analyse[metadata_4_analyse$probe_name != "",]
-metadata_4_analyse<- metadata_4_analyse[!c(metadata_4_analyse$probe_name %in% c("117IM","68IM", "63IM")),]
+metadata_4_analyse<- metadata_4_analyse[!c(metadata_4_analyse$probe_name %in% c("63IM")),]
 # "46IM", "54IM", "63IM", "68IM", "84IM", "102IM", "113IM", "111IM", "125IM"
 
 
@@ -96,7 +138,14 @@ x<-load_DGE(metadata_4_analyse,  "./htseq/")
 output_file<-"./result/NtproBNP_1_pobranie_vs_2_pobranie.csv"
 run_4<-run_limma(x, metadata_4_analyse, output_file)
 length(which(run_4$adj.P.Val < 0.05))
+run_4_deseq<-run_deseq2(x, metadata_4_analyse)
+run_4_deseq <- run_4_deseq[!is.na(run_4_deseq$padj),]
+length(which(run_4_deseq$padj < 0.05))
 
+write.csv2(run_4_deseq, "deseq_4.csv")
+tmp<-run_4_deseq[run_4_deseq$padj < 0.05,]
+tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
+nrow(tmp)
 
 # 2 pobranie (NtproBNP==1, 0)
 conditions <- list(type='Pobranie 2', 'wzrost.NtproBNP'=c(0,1))
@@ -105,15 +154,29 @@ metadata_5_analyse$research<-metadata_5_analyse$'wzrost.NtproBNP'
 metadata_5_analyse$research[metadata_5_analyse$research=='0']<-"Control"
 metadata_5_analyse$research[metadata_5_analyse$research=='1']<-"Searched"
 metadata_5_analyse<- metadata_5_analyse[metadata_5_analyse$probe_name != "",]
-metadata_5_analyse<- metadata_5_analyse[!c(metadata_5_analyse$probe_name %in% c("68IM","63IM")),]
+metadata_5_analyse<- metadata_5_analyse[!c(metadata_5_analyse$probe_name %in% c("63IM")),]
 x<-load_DGE(metadata_5_analyse,  "./htseq2/") 
 y<-get_voom(x, metadata_5_analyse)
-res<-test(metadata_5_analyse, y)
+#res<-test(metadata_5_analyse, y)
 
 x<-load_DGE(metadata_5_analyse,  "./htseq2/") 
 # x <- calcNormFactors(x)
 run_5<-run_limma(x, metadata_5_analyse, output_file)
 length(which(run_5$adj.P.Val < 0.05))
+tmp<-run_5[run_5$adj.P.Val < 0.05,]
+tmp<-tmp[c(tmp$logFC < -1 | tmp$logFC >1),]
+nrow(tmp)
+
+run_5_deseq<-run_deseq2(x, metadata_5_analyse)
+run_5_deseq <- run_5_deseq[!is.na(run_5_deseq$padj),]
+length(which(run_5_deseq$padj < 0.05))
+
+write.csv2(run_5_deseq, "deseq_5.csv")
+tmp<-run_5_deseq[run_5_deseq$padj < 0.05,]
+tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
+nrow(tmp)
+result<-add_genes_info(run_5_deseq)
+
 
 common <- intersect(rownames(run_5), rownames(run_5_no_68))
 length(common)
@@ -159,30 +222,48 @@ metadata_6_analyse$research<-metadata_6_analyse$'wzrost.NtproBNP'
 metadata_6_analyse$research[metadata_6_analyse$research=='0']<-"Control"
 metadata_6_analyse$research[metadata_6_analyse$research=='1']<-"Searched"
 metadata_6_analyse<- metadata_6_analyse[metadata_6_analyse$probe_name != "",]
-metadata_6_analyse<- metadata_6_analyse[!c(metadata_6_analyse$probe_name %in% c("117IM","68IM", "63IM")),]
+metadata_6_analyse<- metadata_6_analyse[!c(metadata_6_analyse$probe_name %in% c("63IM")),]
 
 
 x<-load_DGE(metadata_6_analyse,  "./htseq/") 
 output_file<-"./result/pobranie1_NtproBNP_1_vs_0_with_genes.csv"
 run_6<-run_limma(x, metadata_6_analyse, output_file)
 length(which(run_6$adj.P.Val < 0.05))
+tmp<-run_6[run_6$adj.P.Val < 0.05,]
+tmp<-tmp[c(tmp$logFC < -1 | tmp$logFC >1),]
+nrow(tmp)
+
+run_6_deseq<-run_deseq2(x, metadata_6_analyse)
+run_6_deseq <- run_6_deseq[!is.na(run_6_deseq$padj),]
+length(which(run_6_deseq$padj < 0.05))
+
+write.csv2(run_6_deseq, "deseq_6.csv")
+tmp<-run_6_deseq[run_6_deseq$padj < 0.05,]
+tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
+nrow(tmp)
 
 # 3,4 pobranie (NtproBNP==1, 0)
 
-conditions <- list(type=c('Pobranie 2','Pobranie 3', 'Pobranie 4'), 'wzrost.NtproBNP'=c(0,1))
+conditions <- list(type=c('Pobranie 3', 'Pobranie 4'), 'wzrost.NtproBNP'=c(0,1))
 metadata_7_analyse <- cut_metadata(metadata, conditions)
 metadata_7_analyse$research<-metadata_7_analyse$'wzrost.NtproBNP'
 metadata_7_analyse$research[metadata_7_analyse$research=='0']<-"Control"
 metadata_7_analyse$research[metadata_7_analyse$research=='1']<-"Searched"
 metadata_7_analyse<- metadata_7_analyse[metadata_7_analyse$probe_name != "",]
-metadata_7_analyse<- metadata_7_analyse[!c(metadata_7_analyse$probe_name %in% c("119IM", "53IM", "90IM", "91IM", "63IM", '68IM', '117IM')),]
+metadata_7_analyse<- metadata_7_analyse[!c(metadata_7_analyse$probe_name %in% c("63IM")),]
 
 x<-load_DGE(metadata_7_analyse,  "./htseq2/") 
 output_file<-"./result/pobranie1_NtproBNP_1_vs_0_with_genes.csv"
 run_7<-run_limma(x, metadata_7_analyse, output_file)
 length(which(run_7$adj.P.Val < 0.05))
+run_7_deseq<-run_deseq2(x, metadata_7_analyse)
+run_7_deseq <- run_7_deseq[!is.na(run_7_deseq$padj),]
+length(which(run_7_deseq$padj < 0.05))
 
-
+write.csv2(run_7_deseq, "deseq_7.csv")
+tmp<-run_7_deseq[run_7_deseq$padj < 0.05,]
+tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
+nrow(tmp)
 
 
 conditions <- list(type=c('Pobranie 3', 'Pobranie 4'), 'wzrost.NtproBNP'=c(0,1))
@@ -191,7 +272,7 @@ metadata_8_analyse$research<-metadata_8_analyse$'wzrost.NtproBNP'
 metadata_8_analyse$research[metadata_8_analyse$research=='0']<-"Control"
 metadata_8_analyse$research[metadata_8_analyse$research=='1']<-"Searched"
 metadata_8_analyse<- metadata_8_analyse[metadata_8_analyse$probe_name != "",]
-metadata_8_analyse<- metadata_8_analyse[!c(metadata_8_analyse$probe_name %in% c("119IM", "53IM", "90IM", "91IM", "63IM", '68IM', '117IM')),]
+metadata_8_analyse<- metadata_8_analyse[!c(metadata_8_analyse$probe_name %in% c("63IM")),]
 
 x<-load_DGE(metadata_8_analyse,  "./htseq2/") 
 
@@ -201,7 +282,11 @@ x<-load_DGE(metadata_8_analyse,  "./htseq2/")
 output_file<-"./result/pobranie_3_4_NtproBNP_1_vs_0_with_genes.csv"
 run_8<-run_limma(x, metadata_8_analyse, output_file)
 length(which(run_8$adj.P.Val < 0.05))
+run_8_deseq<-run_deseq2(x, metadata_8_analyse)
+run_8_deseq <- run_8_deseq[!is.na(run_8_deseq$padj),]
+length(which(run_8_deseq$padj < 0.05))
 
+write.csv2(run_8_deseq, "deseq_8.csv")
 
 
 
