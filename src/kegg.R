@@ -12,7 +12,7 @@ see_pathview <- function(..., save_image = FALSE)
 }
                      
 
-runKegg<-function(res, original_gene_list){
+rungseKegg<-function(res, original_gene_list){
   df<-as.data.frame(res)
   ids<-bitr(names(original_gene_list), fromType = "ENSEMBL", toType = "ENTREZID", OrgDb=organism)
   dedup_ids = ids[!duplicated(ids[c("ENSEMBL")]),]
@@ -48,7 +48,44 @@ runKegg<-function(res, original_gene_list){
   write.csv2(df, "gseKEGG.csv")
   return(kk2)
 }
+        
 
+runenrichKegg<-function(res, original_gene_list){
+  df<-as.data.frame(res)
+  ids<-bitr(names(original_gene_list), fromType = "ENSEMBL", toType = "ENTREZID", OrgDb=organism)
+  dedup_ids = ids[!duplicated(ids[c("ENSEMBL")]),]
+  
+  # Create a new dataframe df2 which has only the genes which were successfully mapped using the bitr function above
+  df2 = df[df$X %in% dedup_ids$ENSEMBL,]
+  
+  # Create a new column in df2 with the corresponding ENTREZ IDs
+  df2$Y = dedup_ids$ENTREZID
+  
+  # Create a vector of the gene unuiverse
+  kegg_gene_list <- df2$log2FoldChange
+  
+  # Name vector with ENTREZ ids
+  names(kegg_gene_list) <- df2$Y
+  
+  # omit any NA values 
+  kegg_gene_list<-na.omit(kegg_gene_list)
+
+# sort the list in decreasing order (required for clusterProfiler)
+  kegg_gene_list = sort(kegg_gene_list, decreasing = TRUE)
+  kegg_gene_list <- kegg_gene_list[!duplicated(names(kegg_gene_list))]
+  kegg_gene_list <- sort(kegg_gene_list, decreasing = TRUE)
+  kk2 <- enrichKEGG(geneList     = kegg_gene_list,
+                 organism     = 'hsa',
+                 minGSSize    = 3,
+                 maxGSSize    = 800,
+                 pvalueCutoff = 0.05,
+                 pAdjustMethod = "fdr",
+                  # keyType = "kegg"
+                 keyType       = "ncbi-geneid")
+  df<-as.data.frame(kk2)
+  write.csv2(df, "gseKEGG.csv")
+  return(kk2)
+}
 plotDotPlot<-function(kk2, save_path){
   d<-dotplot(kk2, showCategory = 10, title = "Enriched Pathways" , split=".sign") + facet_grid(.~.sign)
   ggsave(
