@@ -42,9 +42,9 @@ cut_metadata<-function(metadata, conditions){
 library(AnnotationHub)
 library(ensembldb)
 
-add_genes_info<-function(data){
+add_genes_info<-function(data, ah=ah){
   gene_symbols<-rownames(data)
-  ah <- AnnotationHub()
+ # ah <- AnnotationHub()
   query(ah, c("Homo sapiens", "EnsDb"))
   edb <- ah[["AH119325"]]
   genes <- genes(edb, filter = GeneIdFilter(gene_symbols))
