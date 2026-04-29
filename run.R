@@ -215,7 +215,7 @@ result<-add_genes_info(run_5_deseq)
 result[result$padj<0.05,] -> result_sign
 enrich<-enrichGO(result_sign)
 enrich<- as.data.frame(enrich)
-write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_padj_0_05.csv"
+write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_padj_0_05.csv")
 result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
 enrich<-enrichGO(result_sign)
 enrich<- as.data.frame(enrich)
