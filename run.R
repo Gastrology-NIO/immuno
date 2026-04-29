@@ -51,6 +51,18 @@ tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
 nrow(tmp)
 
 
+result<-add_genes_info(run_0_deseq,ah)
+result[result$padj<0.05,] -> result_sign
+enrich<-enrichGO(result_sign)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/pobranie1_vs_kontrola_enrich_padj_0_05.csv")
+result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
+enrich<-enrichGO(result_sign)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/pobranie1_vs_kontrola_enrich_padj_0_05_logfc.csv")
+
+           
+
 # 1 pobranie (3 miesiące vs powyżej 2 lat)
 conditions <- list(type='Pobranie 1', 'time.of.OS'=c('poni\xbfej 3 miesi\xeacy', '> 2 lata'))
 metadata_1_analyse <- cut_metadata(metadata, conditions)
@@ -77,6 +89,17 @@ tmp<-run_1_deseq[run_1_deseq$padj < 0.05,]
 tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
 nrow(tmp)
 
+
+result<-add_genes_info(run_1_deseq, ah)
+result[result$padj<0.05,] -> result_sign
+enrich<-enrichGO(result_sign)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/1pobranie_3miesiace_vs_powyżej_2_lata_enrich_padj_0_05.csv")
+result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
+enrich<-enrichGO(result_sign)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result//1pobranie_3miesiace_vs_powyżej_2_latae_enrich_padj_0_05_logfc.csv")
+           
 # 1 pobranie (I linia vs kolejna linia)
 conditions <- list(type='Pobranie 1', 'linia'=c('I linia', ''))
 metadata_2_analyse <- cut_metadata(metadata, conditions)
@@ -147,6 +170,17 @@ tmp<-run_4_deseq[run_4_deseq$padj < 0.05,]
 tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
 nrow(tmp)
 
+
+result<-add_genes_info(run_4_deseq, ah)
+result[result$padj<0.05,] -> result_sign
+enrich<-enrichGO(result_sign)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/NtproBNP_1_pobranie_vs_2_pobranie_enrich_padj_0_05.csv")
+result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
+enrich<-enrichGO(result_sign)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/NtproBNP_1_pobranie_vs_2_pobranie_enrich_padj_0_05_logfc.csv")
+
 # 2 pobranie (NtproBNP==1, 0)
 conditions <- list(type='Pobranie 2', 'wzrost.NtproBNP'=c(0,1))
 metadata_5_analyse <- cut_metadata(metadata, conditions)
@@ -175,11 +209,17 @@ write.csv2(run_5_deseq, "deseq_5.csv")
 tmp<-run_5_deseq[run_5_deseq$padj < 0.05,]
 tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
 nrow(tmp)
+
+
 result<-add_genes_info(run_5_deseq)
-
-
-common <- intersect(rownames(run_5), rownames(run_5_no_68))
-length(common)
+result[result$padj<0.05,] -> result_sign
+enrich<-enrichGO(result_sign)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_padj_0_05.csv"
+result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
+enrich<-enrichGO(result_sign)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_padj_0_05_logfc.csv")
 
 
 pdf("sensitivity_analysis_68IM.pdf", width = 7, height = 7)
@@ -214,6 +254,44 @@ result_fixed <- result |>
 write.csv2(result_fixed, "./result/pobranie2_NtproBNP_1_vs_0_with_genes.csv")
 
 
+# 1 pobranie vs 2 pobranie
+
+conditions <- list(type=c('Pobranie 1', 'Pobranie 2'),'wzrost.NtproBNP'=0)
+metadata_5_2_analyse <- cut_metadata(metadata, conditions)
+metadata_5_2_analyse$research<-metadata_5_2_analyse$type
+metadata_5_2_analyse$research[metadata_5_2_analyse$research=='Pobranie 1']<-"Control"
+metadata_5_2_analyse$research[metadata_5_2_analyse$research=='Pobranie 2']<-"Searched"
+metadata_5_2_analyse<- metadata_5_2_analyse[metadata_5_2_analyse$probe_name != "",]
+metadata_5_2_analyse<- metadata_5_2_analyse[!c(metadata_5_2_analyse$probe_name %in% c("63IM")),]
+
+
+x<-load_DGE(metadata_5_2_analyse,  "./htseq/") 
+output_file<-"./result/pobranie1_pobranie2_with_genes.csv"
+run_5_2<-run_limma(x, metadata_5_2_analyse, output_file)
+length(which(run_5_2$adj.P.Val < 0.05))
+tmp<-run_5_2[run_5_2$adj.P.Val < 0.05,]
+tmp<-tmp[c(tmp$logFC < -1 | tmp$logFC >1),]
+nrow(tmp)
+
+run_5_2_deseq<-run_deseq2(x, metadata_5_2_analyse)
+run_5_2_deseq <- run_5_2_deseq[!is.na(run_5_2_deseq$padj),]
+length(which(run_5_2_deseq$padj < 0.05))
+
+write.csv2(run_5_2_deseq, "deseq_5_2.csv")
+tmp<-run_5_2_deseq[run_5_2_deseq$padj < 0.05,]
+tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
+nrow(tmp)
+
+
+result<-add_genes_info(run_5_2_deseq)
+result[result$padj<0.05,] -> result_sign
+enrich<-enrichGO(result_sign)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/pobranie1_pobranie2_enrich_padj_0_05.csv"
+result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
+enrich<-enrichGO(result_sign)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/pobranie1_pobranie2_enrich_padj_0_05_logfc.csv")
 # 1 pobranie (NtproBNP==1, 0)
 
 conditions <- list(type='Pobranie 1', 'wzrost.NtproBNP'=c(0,1))
@@ -242,6 +320,18 @@ tmp<-run_6_deseq[run_6_deseq$padj < 0.05,]
 tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
 nrow(tmp)
 
+           
+result<-add_genes_info(run_6_deseq,ah)
+result[result$padj<0.05,] -> result_sign
+enrich<-enrichGO(result_sign)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/pobranie1_NtproBNP_1_vs_0_enrich_padj_0_05.csv")
+result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
+enrich<-enrichGO(result_sign)
+enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/pobranie1_NtproBNP_1_vs_0_enrich_padj_0_05_logfc.csv")
+
+           
 # 3,4 pobranie (NtproBNP==1, 0)
 
 conditions <- list(type=c('Pobranie 3', 'Pobranie 4'), 'wzrost.NtproBNP'=c(0,1))
