@@ -1,14 +1,14 @@
 library(clusterProfiler)
 library(org.Hs.eg.db)
 enrichGO<-function( data,aspect="BP"){
-  geneList <- data$logFC
-  names(geneList) <- data$Row.names
+  geneList <- data$Row.names
+  #names(geneList) <- data$Row.names
 
   # MF
   # BP
   # CC
 ego <- clusterProfiler::enrichGO(
-  gene          = data$Row.names,
+  gene          = geneList,
   OrgDb         = org.Hs.eg.db,
   keyType       = "ENSEMBL",
   ont           = aspect,
