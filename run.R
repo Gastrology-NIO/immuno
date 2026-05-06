@@ -231,18 +231,33 @@ nrow(tmp)
 result<-add_genes_info(run_5_deseq, ah)
 result[result$padj<0.05,] -> result_sign
 kegg_5<-runenrichKegg(result_sign, result_sign$gene_id, "2 pobranie (NtproBNP==1, 0)")
+pdf("keggEnrich_2 pobranie (NtproBNP==1, 0).pdf", width = 7, height = 7)
+dotplot(kegg_5, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
+dev.off()
+
 
 result<-add_genes_info(run_6_deseq, ah)
 result[result$padj<0.05,] -> result_sign
 kegg_6<-runenrichKegg(result_sign, result_sign$gene_id, "1 pobranie (NtproBNP==1, 0)")
+pdf("keggEnrich_1 pobranie (NtproBNP==1, 0).pdf", width = 7, height = 7)
+dotplot(kegg_6, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
+dev.off()
+
 
 result<-add_genes_info(run_1_deseq, ah)
 result[result$padj<0.05,] -> result_sign
 kegg_1<-runenrichKegg(result_sign, result_sign$gene_id, "1 pobranie (3m vs 2 lata)")
+pdf("keggEnrich_1 pobranie (3m vs 2 lata).pdf", width = 7, height = 7)
+dotplot(kegg_1, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
+dev.off()
 
 result<-add_genes_info(run_0_deseq, ah)
 result[result$padj<0.05,] -> result_sign
 kegg_0<-runenrichKegg(result_sign, result_sign$gene_id, "1 pobranie vs kontrola")
+pdf("keggEnrich_1 pobranie vs kontrola.pdf", width = 7, height = 7)
+
+dotplot(kegg_0, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
+dev.off()
 
 
 # enrich<-enrichGO(result_sign)
