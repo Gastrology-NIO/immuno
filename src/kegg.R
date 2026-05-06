@@ -50,7 +50,7 @@ rungseKegg<-function(res, original_gene_list){
 }
         
 
-runenrichKegg<-function(res, original_gene_list){
+runenrichKegg<-function(res, original_gene_list, prefix){
   df<-as.data.frame(res)
   organism<-	org.Hs.eg.db
   ids<-bitr(original_gene_list, fromType = "ENSEMBL", toType = "ENTREZID", OrgDb=organism)
@@ -84,7 +84,7 @@ runenrichKegg<-function(res, original_gene_list){
                   # keyType = "kegg"
                  keyType       = "ncbi-geneid")
   df<-as.data.frame(kk2)
-  write.csv2(df, "gseKEGG.csv")
+  write.csv2(df, paste0(prefix, "_enrichKEGG.csv"))
   return(kk2)
 }
 plotDotPlot<-function(kk2, save_path){
