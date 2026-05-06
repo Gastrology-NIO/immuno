@@ -26,6 +26,10 @@ gene_counts<-load_data_counts("./htseq/", "./data/gene_counts.csv")
 
 # 1 pobranie VS kontrola
 conditions <- list(type=c('Pobranie 1', 'kontrola'))
+
+test<-metadata[metadata$type=="Pobranie 2", ]
+test[test$probe_name!="",]->test
+
 metadata_0_analyse <- cut_metadata(metadata, conditions)
 metadata_0_analyse$research<-metadata_0_analyse$type
 metadata_0_analyse$research[metadata_0_analyse$type=='kontrola']<-"Control"
@@ -53,6 +57,21 @@ nrow(tmp)
 
 result<-add_genes_info(run_0_deseq,ah)
 result[result$padj<0.05,] -> result_sign
+
+result_sign2 <- data.frame(lapply(result_sign, function(x) {
+  if (is.list(x)) sapply(x, paste, collapse = ",") else x
+}))
+
+write.table(result_sign2, "1 pobranie VS kontrola.csv", sep = ";", row.names = FALSE)
+
+
+
+
+lncRNA<-result_sign[result_sign$gene_biotype=="lncRNA",]
+nrow(lncRNA)
+nrow(lncRNA[lncRNA$log2FoldChange< -1,])
+nrow(lncRNA[lncRNA$log2FoldChange>1,])
+
 enrich<-enrichGO(result_sign)
 enrich<- as.data.frame(enrich)
 write.csv2(enrich, "./result/pobranie1_vs_kontrola_enrich_padj_0_05.csv")
@@ -101,6 +120,24 @@ nrow(tmp)
 
 result<-add_genes_info(run_1_deseq, ah)
 result[result$padj<0.05,] -> result_sign
+lncRNA<-result_sign[result_sign$gene_biotype=="lncRNA",]
+nrow(lncRNA)
+nrow(lncRNA[lncRNA$log2FoldChange < -1,])
+nrow(lncRNA[lncRNA$log2FoldChange>1,])
+
+
+
+
+result_sign2 <- data.frame(lapply(result_sign, function(x) {
+  if (is.list(x)) sapply(x, paste, collapse = ",") else x
+}))
+
+write.table(result_sign2, "1 pobranie (3 miesiące vs powyżej 2 lat).csv", sep = ";", row.names = FALSE)
+
+
+
+
+
 enrich<-enrichGO(result_sign)
 enrich<- as.data.frame(enrich)
 write.csv2(enrich, "./result/1pobranie_3miesiace_vs_powyżej_2_lata_enrich_padj_0_05.csv")
@@ -114,7 +151,14 @@ pdf("goEnrich_1.pdf", width = 7, height = 7)
 ego <- pairwise_termsim(enrich_1)
 emapplot(ego)
 dev.off()
-
+original_gene_list <- result_sign$log2FoldChange
+names(original_gene_list) <- result_sign$Row.names
+enrich_tmp<-setReadable(enrich_1, 'org.Hs.eg.db', 'ENSEMBL')
+cnet<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+  ggsave(
+    "goEnrich_genes_1pobranie_3miesiace_vs_powyżej_2_lat.svg",
+    plot = cnet,
+  )
 
 
 # 1 pobranie (I linia vs kolejna linia)
@@ -184,12 +228,24 @@ length(which(run_4_deseq$padj < 0.05))
 
 write.csv2(run_4_deseq, "deseq_4.csv")
 tmp<-run_4_deseq[run_4_deseq$padj < 0.05,]
+
+
 tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
 nrow(tmp)
-
-
 result<-add_genes_info(run_4_deseq, ah)
+
 result[result$padj<0.05,] -> result_sign
+lncRNA<-result_sign[result_sign$gene_biotype=="lncRNA",]
+nrow(lncRNA)
+nrow(lncRNA[lncRNA$log2FoldChange < -1,])
+nrow(lncRNA[lncRNA$log2FoldChange>1,])
+
+result_sign2 <- data.frame(lapply(result_sign, function(x) {
+  if (is.list(x)) sapply(x, paste, collapse = ",") else x
+}))
+
+write.table(result_sign2, "NtproBNP==1 (1 pobranie vs 2 pobranie).csv", sep = ";", row.names = FALSE)
+
 enrich<-enrichGO(result_sign)
 enrich<- as.data.frame(enrich)
 write.csv2(enrich, "./result/NtproBNP_1_pobranie_vs_2_pobranie_enrich_padj_0_05.csv")
@@ -230,11 +286,89 @@ nrow(tmp)
 
 result<-add_genes_info(run_5_deseq, ah)
 result[result$padj<0.05,] -> result_sign
+
+result_sign2 <- data.frame(lapply(result_sign, function(x) {
+  if (is.list(x)) sapply(x, paste, collapse = ",") else x
+}))
+
+write.table(result_sign2, " 2 pobranie (NtproBNP==1, 0).csv", sep = ";", row.names = FALSE)
+
+
+
+
+
+lncRNA<-result_sign[result_sign$gene_biotype=="lncRNA",]
+nrow(lncRNA)
+nrow(lncRNA[lncRNA$log2FoldChange< -1,])
+nrow(lncRNA[lncRNA$log2FoldChange>1,])
+
+
 kegg_5<-runenrichKegg(result_sign, result_sign$gene_id, "2 pobranie (NtproBNP==1, 0)")
 pdf("keggEnrich_2 pobranie (NtproBNP==1, 0).pdf", width = 7, height = 7)
 dotplot(kegg_5, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
 dev.off()
 
+
+kegg_5<-runenrichKegg(result_sign, result_sign$gene_id, "1 pobranie (3m vs 2 lata)")
+pdf("keggEnrich_2 pobranie (NtproBNP==1, 0).pdf", width = 7, height = 7)
+dotplot(kegg_5, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
+dev.off()
+
+pdf("goEnrich_2 pobranie (NtproBNP==1, 0).pdf", width = 7, height = 7)
+ego <- pairwise_termsim(enrich_5)
+emapplot(ego)
+dev.off()
+original_gene_list <- result_sign$log2FoldChange
+names(original_gene_list) <- result_sign$Row.names
+enrich_tmp<-setReadable(enrich_5, 'org.Hs.eg.db', 'ENSEMBL')
+cnet<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+  ggsave(
+    "goEnrich_genes_2 pobranie (NtproBNP==1, 0).svg",
+    plot = cnet,
+  )
+
+
+kegg_tmp<-setReadable(kegg_5, 'org.Hs.eg.db', 'ENTREZID')
+cnet<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
+  ggsave(
+    "gokegg_genes_2 pobranie (NtproBNP==1, 0).svg",
+    plot = cnet,
+  )
+
+summary_tu_deseq <-function(deseq2_res, prefix){
+    result<-add_genes_info(deseq2_res, ah)
+    result[result$padj<0.05,] -> result_sign
+    kegg<-runenrichKegg(result_sign, result_sign$gene_id, prefix)
+    pdf(paste0("keggEnrich_dotplot_",prefix,".pdf"), width = 7, height = 7)
+    dotplot(kegg, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
+    dev.off()
+    
+    pdf(paste0("goEnrich_",prefix,".pdf"), width = 7, height = 7)
+    ego <- pairwise_termsim(enrich_5)
+    emapplot(ego)
+    dev.off()
+
+  
+    original_gene_list <- result_sign$log2FoldChange
+    names(original_gene_list) <- result_sign$Row.names
+    enrich_tmp<-setReadable(enrich_5, 'org.Hs.eg.db', 'ENSEMBL')
+    cnet<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+      ggsave(
+        paste0("goEnrich_cnet_genes",prefix,".svg"),
+        plot = cnet,
+      )
+    
+    
+    kegg_tmp<-setReadable(kegg, 'org.Hs.eg.db', 'ENTREZID')
+    cnet<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
+      ggsave(
+        paste0("gokegg_cnet_genes_",prefix,".svg"),
+        plot = cnet,
+      )
+  
+}
+summary_tu_deseq(run_1_deseq,"1pobranie_3miesiace_vs_powyżej_2_lata" )
+summary_tu_deseq(run_0_deseq,"0" )
 
 result<-add_genes_info(run_6_deseq, ah)
 result[result$padj<0.05,] -> result_sign
@@ -246,10 +380,37 @@ dev.off()
 
 result<-add_genes_info(run_1_deseq, ah)
 result[result$padj<0.05,] -> result_sign
+enrich_1<-enrichGO(result_sign)
+enrich_1_df<- as.data.frame(enrich)
+write.csv2(enrich, "./result//1pobranie_3miesiace_vs_powyżej_2_latae_enrich_padj_0_05_logfc.csv")
+
+
 kegg_1<-runenrichKegg(result_sign, result_sign$gene_id, "1 pobranie (3m vs 2 lata)")
 pdf("keggEnrich_1 pobranie (3m vs 2 lata).pdf", width = 7, height = 7)
 dotplot(kegg_1, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
 dev.off()
+
+pdf("goEnrich_1.pdf", width = 7, height = 7)
+ego <- pairwise_termsim(enrich_1)
+emapplot(ego)
+dev.off()
+original_gene_list <- result_sign$log2FoldChange
+names(original_gene_list) <- result_sign$Row.names
+enrich_tmp<-setReadable(enrich_1, 'org.Hs.eg.db', 'ENSEMBL')
+cnet<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+  ggsave(
+    "goEnrich_genes_1pobranie_3miesiace_vs_powyżej_2_lat.svg",
+    plot = cnet,
+  )
+
+
+kegg_tmp<-setReadable(kegg_1, 'org.Hs.eg.db', 'ENTREZID')
+cnet<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
+  ggsave(
+    "gokegg_genes_1pobranie_3miesiace_vs_powyżej_2_lat.svg",
+    plot = cnet,
+  )
+
 
 result<-add_genes_info(run_0_deseq, ah)
 result[result$padj<0.05,] -> result_sign
@@ -431,6 +592,19 @@ nrow(tmp)
            
 result<-add_genes_info(run_6_deseq,ah)
 result[result$padj<0.05,] -> result_sign
+
+result_sign2 <- data.frame(lapply(result_sign, function(x) {
+  if (is.list(x)) sapply(x, paste, collapse = ",") else x
+}))
+
+write.table(result_sign2, "1 pobranie (NtproBNP==1, 0).csv", sep = ";", row.names = FALSE)
+lncRNA<-result_sign[result_sign$gene_biotype=="lncRNA",]
+nrow(lncRNA)
+nrow(lncRNA[lncRNA$log2FoldChange< -1,])
+nrow(lncRNA[lncRNA$log2FoldChange>1,])
+           
+
+           
 enrich<-enrichGO(result_sign)
 enrich<- as.data.frame(enrich)
 write.csv2(enrich, "./result/pobranie1_NtproBNP_1_vs_0_enrich_padj_0_05.csv")
