@@ -52,6 +52,7 @@ rungseKegg<-function(res, original_gene_list){
 
 runenrichKegg<-function(res, original_gene_list){
   df<-as.data.frame(res)
+  organism<-	org.Hs.eg.db
   ids<-bitr(names(original_gene_list), fromType = "ENSEMBL", toType = "ENTREZID", OrgDb=organism)
   dedup_ids = ids[!duplicated(ids[c("ENSEMBL")]),]
   
@@ -74,7 +75,7 @@ runenrichKegg<-function(res, original_gene_list){
   kegg_gene_list = sort(kegg_gene_list, decreasing = TRUE)
   kegg_gene_list <- kegg_gene_list[!duplicated(names(kegg_gene_list))]
   kegg_gene_list <- sort(kegg_gene_list, decreasing = TRUE)
-  kk2 <- enrichKEGG(geneList     = kegg_gene_list,
+  kk2 <- enrichKEGG(kegg_gene_list,
                  organism     = 'hsa',
                  minGSSize    = 3,
                  maxGSSize    = 800,
