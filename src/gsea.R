@@ -52,7 +52,7 @@ plotEmaPlot<-function(gse, save_path="./emapplot.svg"){
 }
 
 
-plotEmaPlot<-function(gse,original_gene_list, save_path="./cnetplot2.png"){
+plotcnetPlot<-function(gse,original_gene_list, save_path="./cnetplot2.png"){
   gene_list<-na.omit(original_gene_list)
   cnet<-cnetplot(gse, categorySize="pvalue", foldChange=gene_list, showCategory = 3)
   ggsave(
