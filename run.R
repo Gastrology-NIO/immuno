@@ -230,6 +230,21 @@ nrow(tmp)
 
 result<-add_genes_info(run_5_deseq, ah)
 result[result$padj<0.05,] -> result_sign
+kegg_5<-runenrichKegg(result_sign, result_sign$gene_id, "2 pobranie (NtproBNP==1, 0)")
+
+result<-add_genes_info(run_6_deseq, ah)
+result[result$padj<0.05,] -> result_sign
+kegg_6<-runenrichKegg(result_sign, result_sign$gene_id, "1 pobranie (NtproBNP==1, 0)")
+
+result<-add_genes_info(run_1_deseq, ah)
+result[result$padj<0.05,] -> result_sign
+kegg_1<-runenrichKegg(result_sign, result_sign$gene_id, "1 pobranie (3m vs 2 lata)")
+
+result<-add_genes_info(run_0_deseq, ah)
+result[result$padj<0.05,] -> result_sign
+kegg_0<-runenrichKegg(result_sign, result_sign$gene_id, "1 pobranie vs kontrola")
+
+
 # enrich<-enrichGO(result_sign)
 # enrich<- as.data.frame(enrich)
 write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_padj_0_05.csv")
