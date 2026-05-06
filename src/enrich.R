@@ -19,3 +19,21 @@ ego <- clusterProfiler::enrichGO(
 
     return(ego)
   }
+enrichKEGG<-function(data){
+  geneList <- data$Row.names
+  #names(geneList) <- data$Row.names
+
+  # MF
+  # BP
+  # CC
+ego <- clusterProfiler::enrichKEGG(
+  gene          = geneList,
+  OrgDb         = org.Hs.eg.db,
+  keyType       = "ENSEMBL",
+  pAdjustMethod = "BH",
+  pvalueCutoff  = 0.05,
+  qvalueCutoff  = 0.2
+)
+
+    return(ego)
+  }
