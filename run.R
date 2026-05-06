@@ -57,9 +57,18 @@ enrich<-enrichGO(result_sign)
 enrich<- as.data.frame(enrich)
 write.csv2(enrich, "./result/pobranie1_vs_kontrola_enrich_padj_0_05.csv")
 result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
-enrich<-enrichGO(result_sign)
-enrich<- as.data.frame(enrich)
-write.csv2(enrich, "./result/pobranie1_vs_kontrola_enrich_padj_0_05_logfc.csv")
+enrich_0<-enrichGO(result_sign)
+enrich_0_df<- as.data.frame(enrich_0)
+write.csv2(enrich_0_df, "./result/pobranie1_vs_kontrola_enrich_padj_0_05_logfc.csv")
+
+
+
+pdf("goEnrich_0.pdf", width = 7, height = 7)
+ego <- pairwise_termsim(enrich_0)
+emapplot(ego)
+dev.off()
+
+
 
            
 
@@ -96,10 +105,18 @@ enrich<-enrichGO(result_sign)
 enrich<- as.data.frame(enrich)
 write.csv2(enrich, "./result/1pobranie_3miesiace_vs_powyżej_2_lata_enrich_padj_0_05.csv")
 result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
-enrich<-enrichGO(result_sign)
-enrich<- as.data.frame(enrich)
+enrich_1<-enrichGO(result_sign)
+enrich_1_df<- as.data.frame(enrich)
 write.csv2(enrich, "./result//1pobranie_3miesiace_vs_powyżej_2_latae_enrich_padj_0_05_logfc.csv")
-           
+
+
+pdf("goEnrich_1.pdf", width = 7, height = 7)
+ego <- pairwise_termsim(enrich_1)
+emapplot(ego)
+dev.off()
+
+
+
 # 1 pobranie (I linia vs kolejna linia)
 conditions <- list(type='Pobranie 1', 'linia'=c('I linia', ''))
 metadata_2_analyse <- cut_metadata(metadata, conditions)
@@ -177,8 +194,8 @@ enrich<-enrichGO(result_sign)
 enrich<- as.data.frame(enrich)
 write.csv2(enrich, "./result/NtproBNP_1_pobranie_vs_2_pobranie_enrich_padj_0_05.csv")
 result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
-enrich<-enrichGO(result_sign)
-enrich<- as.data.frame(enrich)
+enrich_4<-enrichGO(result_sign)
+enrich_4<- as.data.frame(enrich)
 write.csv2(enrich, "./result/NtproBNP_1_pobranie_vs_2_pobranie_enrich_padj_0_05_logfc.csv")
 
 # 2 pobranie (NtproBNP==1, 0)
@@ -211,15 +228,75 @@ tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
 nrow(tmp)
 
 
-result<-add_genes_info(run_5_deseq)
+result<-add_genes_info(run_5_deseq, ah)
 result[result$padj<0.05,] -> result_sign
-enrich<-enrichGO(result_sign)
-enrich<- as.data.frame(enrich)
+# enrich<-enrichGO(result_sign)
+# enrich<- as.data.frame(enrich)
 write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_padj_0_05.csv")
 result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
-enrich<-enrichGO(result_sign)
-enrich<- as.data.frame(enrich)
+  gene_symbols_5<-rownames(result_sign)
+enrich_5<-enrichGO(result_sign)
+enrich_5<- as.data.frame(enrich_5)
 write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_padj_0_05_logfc.csv")
+
+enrich_5<-enrichGO(result_sign)
+enrich_5_df<- as.data.frame(enrich_5)
+pdf("goEnrich_5.pdf", width = 7, height = 7)
+ego <- pairwise_termsim(enrich_5)
+emapplot(ego)
+dev.off()
+
+
+
+result<-add_genes_info(run_4_deseq, ah)
+result[result$padj<0.05,] -> result_sign
+# enrich<-enrichGO(result_sign)
+# enrich<- as.data.frame(enrich)
+write.csv2(enrich, "./result/NtproBNP_1_pobranie_vs_2_pobranie_enrich_padj_0_05_logfc.csv")
+result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
+enrich_4<-enrichGO(result_sign)
+enrich_4_df<- as.data.frame(enrich_4)
+write.csv2(enrich_4_df, "./result/NtproBNP_1_pobranie_vs_2_pobranie_enrich_padj_0_05_logfc.csv")
+
+pdf("goEnrich_4.pdf", width = 7, height = 7)
+ego <- pairwise_termsim(enrich_4)
+emapplot(ego)
+dev.off()
+
+
+  gene_symbols_4<-rownames(result_sign)
+
+
+library(clusterProfiler)
+library(enrichplot)
+
+geneClusters <- list(
+  pobranie2_NtproBNP_1_vs_0 = gene_symbols_5,
+  NtproBNP_1_pobranie_vs_2_pobranie = gene_symbols_4
+)
+
+cc <- compareCluster(
+  geneCluster = geneClusters,
+  fun = "enrichGO",
+  OrgDb = org.Hs.eg.db,   # zmień jeśli trzeba
+  ont = "BP"
+)
+cc <- pairwise_termsim(cc)
+pdf("goEnrich.pdf", width = 7, height = 7)
+
+emapplot(cc, pie = "count")
+dev.off()
+
+
+
+enrich_5<-enrichGO(result_sign)
+enrich_5<- as.data.frame(enrich_5)
+write.csv2(enrich, "./result/pobranie2_NtproBNP_1_vs_0_enrich_padj_0_05_logfc.csv")
+
+
+library(clusterProfiler)
+library(enrichplot)
+
 
 
 pdf("sensitivity_analysis_68IM.pdf", width = 7, height = 7)
@@ -294,6 +371,7 @@ enrich<- as.data.frame(enrich)
 write.csv2(enrich, "./result/pobranie1_pobranie2_enrich_padj_0_05_logfc.csv")
 # 1 pobranie (NtproBNP==1, 0)
 
+
 conditions <- list(type='Pobranie 1', 'wzrost.NtproBNP'=c(0,1))
 metadata_6_analyse <- cut_metadata(metadata, conditions)
 metadata_6_analyse$research<-metadata_6_analyse$'wzrost.NtproBNP'
@@ -327,10 +405,9 @@ enrich<-enrichGO(result_sign)
 enrich<- as.data.frame(enrich)
 write.csv2(enrich, "./result/pobranie1_NtproBNP_1_vs_0_enrich_padj_0_05.csv")
 result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
-enrich<-enrichGO(result_sign)
-enrich<- as.data.frame(enrich)
+enrich_6<-enrichGO(result_sign)
+enrich_6<- as.data.frame(enrich_6)
 write.csv2(enrich, "./result/pobranie1_NtproBNP_1_vs_0_enrich_padj_0_05_logfc.csv")
-
            
 # 3,4 pobranie (NtproBNP==1, 0)
 
