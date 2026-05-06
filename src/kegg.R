@@ -14,7 +14,7 @@ see_pathview <- function(..., save_image = FALSE)
 
 rungseKegg<-function(res, original_gene_list){
   df<-as.data.frame(res)
-  ids<-bitr(names(original_gene_list), fromType = "ENSEMBL", toType = "ENTREZID", OrgDb=organism)
+  ids<-bitr(original_gene_list, fromType = "ENSEMBL", toType = "ENTREZID", OrgDb=organism)
   dedup_ids = ids[!duplicated(ids[c("ENSEMBL")]),]
   
   # Create a new dataframe df2 which has only the genes which were successfully mapped using the bitr function above
@@ -53,11 +53,11 @@ rungseKegg<-function(res, original_gene_list){
 runenrichKegg<-function(res, original_gene_list){
   df<-as.data.frame(res)
   organism<-	org.Hs.eg.db
-  ids<-bitr(names(original_gene_list), fromType = "ENSEMBL", toType = "ENTREZID", OrgDb=organism)
+  ids<-bitr(original_gene_list, fromType = "ENSEMBL", toType = "ENTREZID", OrgDb=organism)
   dedup_ids = ids[!duplicated(ids[c("ENSEMBL")]),]
   
   # Create a new dataframe df2 which has only the genes which were successfully mapped using the bitr function above
-  df2 = df[df$X %in% dedup_ids$ENSEMBL,]
+  df2 = df[df$gene_id %in% dedup_ids$ENSEMBL,]
   
   # Create a new column in df2 with the corresponding ENTREZ IDs
   df2$Y = dedup_ids$ENTREZID
@@ -75,7 +75,7 @@ runenrichKegg<-function(res, original_gene_list){
   kegg_gene_list = sort(kegg_gene_list, decreasing = TRUE)
   kegg_gene_list <- kegg_gene_list[!duplicated(names(kegg_gene_list))]
   kegg_gene_list <- sort(kegg_gene_list, decreasing = TRUE)
-  kk2 <- enrichKEGG(kegg_gene_list,
+  kk2 <- enrichKEGG(names(kegg_gene_list),
                  organism     = 'hsa',
                  minGSSize    = 3,
                  maxGSSize    = 800,
