@@ -42,6 +42,27 @@ run_deseq2<-function(x, metadata){
     return(res)
 }
 
+
+
+run_deseq2_paired<-function(x, metadata){
+    s<-metadata$s
+    research <- metadata$research
+     mm <- model.matrix(~ s + research, data=x)
+    keep <- filterByExpr(x, design=mm)
+    keep[c("__no_feature", "__ambiguous", "__too_low_aQual", "__not_aligned", "__alignment_not_unique")] <-FALSE
+    d0<-x[keep,]
+    dds <- DESeqDataSetFromMatrix(countData = d0,
+                                  colData = metadata,
+                                  design= ~ patient_id + s + research)
+    diagdds = DESeq(dds , test="Wald", fitType="parametric")
+    res = results(diagdds, cooksCutoff = FALSE)
+        res <- results(diagdds, contrast = c("research", "Searched", "Control"))
+    res<-as(res, "data.frame")
+    return(res)
+}
+
+
+
 sensitivity_limma <- function(v, metadata, outlier, design_formula = ~ s + research) {
 
   library(limma)
