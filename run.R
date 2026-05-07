@@ -186,17 +186,29 @@ metadata_3_analyse <- cut_metadata(metadata, conditions)
 metadata_3_analyse$research<-metadata_3_analyse$type
 metadata_3_analyse$research[metadata_3_analyse$research=='Pobranie 1']<-"Control"
 metadata_3_analyse$research[metadata_3_analyse$research=='Pobranie 2']<-"Searched"
-metadata_3_analyse<- metadata_3_analyse[!c(metadata_3_analyse$probe_name %in% c("41IM", "31IM","117IM","45IM")),]
 metadata_3_analyse[metadata_3_analyse$probe_name != "",] -> metadata_3_analyse
 # metadata_3_analyse<- metadata_3_analyse[!c(metadata_3_analyse$probe_name %in% c("123IM", "96IM",  "95IM", "107IM", "92IM" , "116IM", "117IM", "110IM", "130IM","27IM",
 # "34IM","36IM","33IM","39IM","43IM","35IM","64IM","45IM","72IM","47IM","49IM","66IM","61IM","78IM","70IM","87IM","94IM")),]
 # samtools sort -n -o ./sorted/41IM.nameSorted.bam ./star/41IMAligned.sortedByCoord.out.bam
 # htseq-count --stranded=reverse -f bam -r name ./sorted/117IM.nameSorted.bam ./reference/Homo_sapiens.GRCh38.99.gtf > ./htseq/117IM.txt &
 
+metadata_3_analyse<- metadata_3_analyse[!c(metadata_3_analyse$probe_name %in% c("4IM","3IM")),]
+
 x<-load_DGE(metadata_3_analyse,  "./htseq/") 
 output_file<-"./result/NtproBNP_0_pobranie_vs_2_pobranie.csv"
 run_3<-run_limma(x, metadata_3_analyse, output_file)
 length(which(run_3$adj.P.Val < 0.05))
+
+metadata_3_analyse_paired <- metadata_3_analyse %>%
+  group_by(patient_id) %>%
+  filter(n_distinct(type) == 2)
+x_paired<-load_DGE(metadata_3_analyse_paired,  "./htseq2/") 
+
+run_3_deseq_paired<-run_deseq2_paired(x_paired, metadata_3_analyse_paired)
+run_3_deseq_paired <- run_3_deseq_paired[!is.na(run_3_deseq_paired$padj),]
+length(which(run_3_deseq_paired$padj < 0.05))
+
+
 run_3_deseq<-run_deseq2(x, metadata_3_analyse)
 run_3_deseq <- run_3_deseq[!is.na(run_3_deseq$padj),]
 length(which(run_3_deseq$padj < 0.05))
@@ -225,6 +237,71 @@ length(which(run_4$adj.P.Val < 0.05))
 run_4_deseq<-run_deseq2(x, metadata_4_analyse)
 run_4_deseq <- run_4_deseq[!is.na(run_4_deseq$padj),]
 length(which(run_4_deseq$padj < 0.05))
+
+
+metadata_4_analyse_paired <- metadata_4_analyse %>%
+  group_by(patient_id) %>%
+  filter(n_distinct(type) == 2)
+x_paired<-load_DGE(metadata_4_analyse_paired,  "./htseq2/") 
+
+run_4_deseq_paired<-run_deseq2_paired(x_paired, metadata_4_analyse_paired)
+run_4_deseq_paired <- run_4_deseq_paired[!is.na(run_4_deseq_paired$padj),]
+length(which(run_4_deseq_paired$padj < 0.05))
+
+
+
+result<-add_genes_info(run_4_deseq_paired, ah)
+result[result$padj<0.05,] -> result_sign
+enrich_4_paired<-enrichGO(result_sign)
+enrich_4_paired_df<- as.data.frame(enrich_4_paired)
+write.csv2(enrich_4_paired, "./result/NtproBNP==1 (1 pobranie vs 2 pobranie)_lfc.csv")
+
+
+kegg_4_paired<-runenrichKegg(result_sign, result_sign$gene_id, "NtproBNP==1 (1 pobranie vs 2 pobranie)")
+pdf("keggEnrich_NtproBNP==1 (1 pobranie vs 2 pobranie).pdf", width = 7, height = 7)
+dotplot(kegg_4_paired, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
+dev.off()
+
+pdf("goEnrich_NtproBNP==1 (1 pobranie vs 2 pobranie).pdf", width = 7, height = 7)
+ego <- pairwise_termsim(enrich_4_paired)
+emapplot(ego)
+dev.off()
+original_gene_list <- result_sign$log2FoldChange
+names(original_gene_list) <- result_sign$Row.names
+enrich_tmp<-setReadable(enrich_4_paired, 'org.Hs.eg.db', 'ENSEMBL')
+cnet<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+  ggsave(
+    "goEnrich_genes_NtproBNP==1 (1 pobranie vs 2 pobranie).svg",
+    plot = cnet,
+  )
+
+
+kegg_tmp<-setReadable(kegg_4_paired, 'org.Hs.eg.db', 'ENTREZID')
+cnet<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
+  ggsave(
+    "gokegg_genes_NtproBNP==1 (1 pobranie vs 2 pobranie).svg",
+    plot = cnet,
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 write.csv2(run_4_deseq, "deseq_4.csv")
 tmp<-run_4_deseq[run_4_deseq$padj < 0.05,]
@@ -308,11 +385,6 @@ pdf("keggEnrich_2 pobranie (NtproBNP==1, 0).pdf", width = 7, height = 7)
 dotplot(kegg_5, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
 dev.off()
 
-
-kegg_5<-runenrichKegg(result_sign, result_sign$gene_id, "1 pobranie (3m vs 2 lata)")
-pdf("keggEnrich_2 pobranie (NtproBNP==1, 0).pdf", width = 7, height = 7)
-dotplot(kegg_5, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
-dev.off()
 
 pdf("goEnrich_2 pobranie (NtproBNP==1, 0).pdf", width = 7, height = 7)
 ego <- pairwise_termsim(enrich_5)
