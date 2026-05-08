@@ -29,6 +29,9 @@ run_analyse(folder, metadata_1_analyse, name, analyse_pairs=F, analyse_sex=T)
 
 
 # NtproBNP==1 (1 pobranie vs 2 pobranie)
+name<-"NtproBNP_1_1_pobranie_vs_2_pobranie"
+folder<-paste0("./result/",name,"/")
+
 conditions <- list(type=c('Pobranie 1', 'Pobranie 2'), 'wzrost.NtproBNP'=1)
 metadata_4_analyse <- cut_metadata(metadata, conditions)
 metadata_4_analyse$research<-metadata_4_analyse$type
@@ -42,6 +45,9 @@ run_analyse(folder, metadata_4_analyse, name, analyse_pairs=T, analyse_sex=F)
 
 
 # 2 pobranie (NtproBNP==1, 0)
+name<-"2_pobranie_NtproBNP_1_vs_0"
+folder<-paste0("./result/",name,"/")
+
 conditions <- list(type='Pobranie 2', 'wzrost.NtproBNP'=c(0,1))
 metadata_5_analyse <- cut_metadata(metadata, conditions)
 metadata_5_analyse$research<-metadata_5_analyse$'wzrost.NtproBNP'
