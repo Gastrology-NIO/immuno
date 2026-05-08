@@ -47,16 +47,26 @@ run_analyse <- function(folder, metadata_0_analyse, name, analyse_pairs=T, analy
     
     write.csv2(enrich, output_file)
     result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
-    enrich_0<-enrichGO(result_sign)
-    enrich_0_df<- as.data.frame(enrich_0)
+    enrich<-enrichGO(result_sign)
+    enrich_df<- as.data.frame(enrich)
     output_file<-paste0(folder, "enrichmentGO_padj_0_05_lfc_1_", name,".csv")
     
-    write.csv2(enrich_0_df, output_file)
+    write.csv2(enrich_df, output_file)
     
     
     
     pdf(paste0(folder,"emmaplot_", name, "_goEnrich_0.pdf"), width = 7, height = 7)
-    ego <- pairwise_termsim(enrich_0)
+    ego <- pairwise_termsim(enrich)
     emapplot(ego)
     dev.off()
+
+    original_gene_list <- result_sign$log2FoldChange
+    names(original_gene_list) <- result_sign$Row.names
+    enrich_tmp<-setReadable(enrich, 'org.Hs.eg.db', 'ENSEMBL')
+    cnet<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+      ggsave(
+          paste0(folder,"cnet_", name, "_goEnrich_0.pdf"),
+        plot = cnet,
+      )
+    
 }
