@@ -1,6 +1,5 @@
 
 run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) {
-    ah <-
     # limma
     x<-load_DGE(metadata,  "./htseq/") 
     output_file<-paste0(folder, "limma", name,".csv")
@@ -58,7 +57,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
 
     
     #plot PCA
-    output_file<-paste0(folder, "plotPCA_", name,".csv")
+    output_file<-paste0(folder, "plotPCA_", name,".svg")
     plotPCA(x, metadata, output_file)
     
     # enrichment GO
