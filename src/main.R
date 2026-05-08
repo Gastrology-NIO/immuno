@@ -62,7 +62,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     
     #plot PCA
     output_file<-paste0(folder, "plotPCA_", name,".svg")
-    plotPCA(dds, metadata, output_file, analyse_pairs=T, analyse_sex=T)
+    plotPCA(dds, metadata, output_file)
     
     # enrichment GO
     enrich<-enrichGO(result_sign)
