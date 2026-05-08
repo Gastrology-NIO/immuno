@@ -67,22 +67,39 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     plotPCA(dds, metadata, output_file, model)
     
     # enrichment GO
-    enrich<-enrichGO(result_sign)
-    enrich<- as.data.frame(enrich)
-    output_file<-paste0(folder, "enrichmentGO_padj_0_05_", name,".csv")
+    enrich_BP<-enrichGO(result_sign, "BP")
+    enrich_BP<- as.data.frame(enrich_BP)
+    output_file<-paste0(folder, "enrichmentGO_BH_padj_0_05_", name,".csv")
+    write.csv2(enrich_BP, output_file)
     
-    write.csv2(enrich, output_file)
     result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
-    enrich<-enrichGO(result_sign)
-    enrich_df<- as.data.frame(enrich)
-    output_file<-paste0(folder, "enrichmentGO_padj_0_05_lfc_1_", name,".csv")
-    
-    write.csv2(enrich_df, output_file)
-    
+    enrich_BP<-enrichGO(result_sign, "BP")
+    enrich_BP_df<- as.data.frame(enrich)
+    output_file<-paste0(folder, "enrichmentGO_BP_padj_0_05_lfc_1_", name,".csv")
+    write.csv2(enrich_BH_df, output_file)
+
+        enrich_MF<-enrichGO(result_sign, "MF")
+    enrich_MF_df<- as.data.frame(enrich_MF)
+    output_file<-paste0(folder, "enrichmentGO_MF_padj_0_05_lfc_1_", name,".csv")
+    write.csv2(enrich_BH_df, output_file)
+
+        enrich_CC<-enrichGO(result_sign, "CC")
+    enrich_CC_df<- as.data.frame(enrich)
+    output_file<-paste0(folder, "enrichmentGO_CC_padj_0_05_lfc_1_", name,".csv")
+    write.csv2(enrich_CC_df, output_file)
     
     pdf(paste0(folder,"emmaplot_", name, "_goEnrich.pdf"), width = 7, height = 7)
-    ego <- pairwise_termsim(enrich)
-    e<-emapplot(ego)
+    ego <- pairwise_termsim(enrich_BP)
+    e1<-emapplot(ego)
+
+    ego <- pairwise_termsim(enrich_MF)
+    e2<-emapplot(ego)
+
+    ego <- pairwise_termsim(enrich_CC)
+    e3<-emapplot(ego)
+
+    e<-patchwork::wrap_plots(
+        e1,e2,e3)
     print(e)
     dev.off()
 
