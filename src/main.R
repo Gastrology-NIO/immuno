@@ -78,12 +78,12 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     output_file<-paste0(folder, "enrichmentGO_BP_padj_0_05_lfc_1_", name,".csv")
     write.csv2(enrich_BP_df, output_file)
 
-        enrich_MF<-enrichGO(result_sign, "MF")
+    enrich_MF<-enrichGO(result_sign, "MF")
     enrich_MF_df<- as.data.frame(enrich_MF)
     output_file<-paste0(folder, "enrichmentGO_MF_padj_0_05_lfc_1_", name,".csv")
     write.csv2(enrich_MF_df, output_file)
 
-        enrich_CC<-enrichGO(result_sign, "CC")
+    enrich_CC<-enrichGO(result_sign, "CC")
     enrich_CC_df<- as.data.frame(enrich_CC)
     output_file<-paste0(folder, "enrichmentGO_CC_padj_0_05_lfc_1_", name,".csv")
     write.csv2(enrich_CC_df, output_file)
@@ -93,18 +93,20 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
 
     ego <- pairwise_termsim(enrich_MF)
     e2<-emapplot(ego)
+    if (nrow(enrich_CC_df)> 1){
 
     ego <- pairwise_termsim(enrich_CC)
     e3<-emapplot(ego)
-    
+    }
     pdf(paste0(folder,"emmaplot_BH_", name, "_goEnrich.pdf"), width = 7, height = 7)
     print(e1)
     dev.off()
+        if (nrow(enrich_CC_df)> 1){
 
     pdf(paste0(folder,"emmaplot_CC_", name, "_goEnrich.pdf"), width = 7, height = 7)
     print(e3)
     dev.off()
-
+}
     pdf(paste0(folder,"emmaplot_MF_", name, "_goEnrich.pdf"), width = 7, height = 7)
     print(e2)
     dev.off()
@@ -118,12 +120,13 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
        d<- dotplot(enrich_MF, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
     print(d)
     dev.off()
+    if (nrow(enrich_CC_df)> 1){
 
         pdf(paste0(folder,"dotplot_GOEnrich_CC_",name,".pdf"), width = 7, height = 7)
        d<- dotplot(enrich_CC, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
     print(d)
     dev.off()
-    
+    }
     original_gene_list <- result_sign$log2FoldChange
     names(original_gene_list) <- result_sign$Row.names
     enrich_tmp<-setReadable(enrich_BP, 'org.Hs.eg.db', 'ENSEMBL')
