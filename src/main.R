@@ -99,6 +99,9 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     
     
     kegg_tmp<-setReadable(kegg, 'org.Hs.eg.db', 'ENTREZID')
+    
+    original_gene_list <- result_sign$log2FoldChange
+    names(original_gene_list) <- result_sign$entrezid
     cnet<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
       ggsave(
           paste0(folder,"cnet_", name, "_KEGGEnrich.pdf"),
