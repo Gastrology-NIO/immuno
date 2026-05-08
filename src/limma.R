@@ -12,7 +12,7 @@ get_voom<-function(x, metadata){
 run_limma<-function(x, metadata, output_file){
     s<-metadata$s
     research <- metadata$research
-    mm <- model.matrix(~ s + research, data=x)
+    mm <- model.matrix(~ s + research, data=metadata)
     keep <- filterByExpr(x, design=mm)
     # keep[c("__no_feature", "__ambiguous", "__too_low_aQual", "__not_aligned", "__alignment_not_unique")] <-FALSE
     d0<-x[keep,]
@@ -28,7 +28,7 @@ run_limma<-function(x, metadata, output_file){
 run_deseq2<-function(x, metadata){
     s<-metadata$s
     research <- metadata$research
-     mm <- model.matrix(~ s + research, data=x)
+     mm <- model.matrix(~ s + research, data=metadata)
     keep <- filterByExpr(x, design=mm)
     keep[c("__no_feature", "__ambiguous", "__too_low_aQual", "__not_aligned", "__alignment_not_unique")] <-FALSE
     d0<-x[keep,]
@@ -50,7 +50,7 @@ run_deseq2_paired<-function(x, metadata){
     s<-metadata$s
     research <- metadata$research
     patient_id <- metadata$patient_id
-     mm <- model.matrix(~ patient_id + research, data=x)
+     mm <- model.matrix(~ patient_id + research, data=metadata)
     keep <- filterByExpr(x, design=mm)
     keep[c("__no_feature", "__ambiguous", "__too_low_aQual", "__not_aligned", "__alignment_not_unique")] <-FALSE
     d0<-x[keep,]
