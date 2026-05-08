@@ -18,20 +18,22 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
         
     } else if (analyse_sex==T){
 
-    deseq_res<-run_deseq2(x, metadata)
-    run_deseq<-deseq_res$res
-    dds<-deseq_res$dds
+        deseq_res<-run_deseq2(x, metadata)
+        run_deseq<-deseq_res$res
+        dds<-deseq_res$dds
+        model <- dist_mat ~ s + research
 
     } else if (analyse_pairs==T){
 
-    # deseq2 with pairs
-    metadata <- metadata %>%
-      group_by(patient_id) %>%
-      filter(n_distinct(type) == 2)
-    x<-load_DGE(metadata,  "./htseq2/") 
-    deseq_res<-run_deseq2_paired(x, metadata)
-    run_deseq<-deseq_res$res
-    dds<-deseq_res$dds
+        # deseq2 with pairs
+        metadata <- metadata %>%
+          group_by(patient_id) %>%
+          filter(n_distinct(type) == 2)
+        x<-load_DGE(metadata,  "./htseq2/") 
+        deseq_res<-run_deseq2_paired(x, metadata)
+        run_deseq<-deseq_res$res
+        dds<-deseq_res$dds
+        model <- dist_mat ~ patient_id + research
     }
 
     
@@ -61,7 +63,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     
     #plot PCA
     output_file<-paste0(folder, "plotPCA_", name,".svg")
-    plotPCA(dds, metadata, output_file)
+    plotPCA(dds, metadata, output_file, model)
     
     # enrichment GO
     enrich<-enrichGO(result_sign)
