@@ -33,6 +33,8 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
         deseq_res<-run_deseq2_paired(x, metadata)
         run_deseq<-deseq_res$res
         dds<-deseq_res$dds
+                model <- dist_mat ~ patient_id + research
+
     }
 
     
@@ -62,7 +64,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     
     #plot PCA
     output_file<-paste0(folder, "plotPCA_", name,".svg")
-    plotPCA(dds, metadata, output_file)
+    plotPCA(dds, metadata, output_file, model)
     
     # enrichment GO
     enrich<-enrichGO(result_sign)
@@ -80,7 +82,8 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     
     pdf(paste0(folder,"emmaplot_", name, "_goEnrich.pdf"), width = 7, height = 7)
     ego <- pairwise_termsim(enrich)
-    emapplot(ego)
+    e<-emapplot(ego)
+    print(e)
     dev.off()
 
     original_gene_list <- result_sign$log2FoldChange
@@ -96,13 +99,13 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     # enrichment KEGG
     
     kegg<-runenrichKegg(result_sign, result_sign$gene_id, name)
-      df<-as.data.frame(kegg)
+    df<-as.data.frame(kegg)
         output_file<-paste0(folder, "enrichmentKEGG_padj_0_05_", name,".csv")
-
-      write.csv2(df, output_file)
+    write.csv2(df, output_file)
     
-    pdf(paste0(folder,"keggEnrich_",name,".pdf"), width = 7, height = 7)
-    dotplot(kegg, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
+    pdf(paste0(folder,"dotplot_keggEnrich_",name,".pdf"), width = 7, height = 7)
+       d<- dotplot(kegg, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
+    print(d)
     dev.off()
     
     
