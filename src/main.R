@@ -88,7 +88,6 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     output_file<-paste0(folder, "enrichmentGO_CC_padj_0_05_lfc_1_", name,".csv")
     write.csv2(enrich_CC_df, output_file)
     
-    pdf(paste0(folder,"emmaplot_", name, "_goEnrich.pdf"), width = 7, height = 7)
     ego <- pairwise_termsim(enrich_BP)
     e1<-emapplot(ego)
 
@@ -97,12 +96,34 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
 
     ego <- pairwise_termsim(enrich_CC)
     e3<-emapplot(ego)
-
-    e<-patchwork::wrap_plots(
-        e1,e2,e3)
-    print(e)
+    
+    pdf(paste0(folder,"emmaplot_BH_", name, "_goEnrich.pdf"), width = 7, height = 7)
+    print(e1)
     dev.off()
 
+    pdf(paste0(folder,"emmaplot_CC_", name, "_goEnrich.pdf"), width = 7, height = 7)
+    print(e3)
+    dev.off()
+
+    pdf(paste0(folder,"emmaplot_MF_", name, "_goEnrich.pdf"), width = 7, height = 7)
+    print(e2)
+    dev.off()
+    
+    pdf(paste0(folder,"dotplot_GOEnrich_BP_",name,".pdf"), width = 7, height = 7)
+       d<- dotplot(enrich_BP, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
+    print(d)
+    dev.off()
+
+    pdf(paste0(folder,"dotplot_GOEnrich_MF_",name,".pdf"), width = 7, height = 7)
+       d<- dotplot(enrich_MF, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
+    print(d)
+    dev.off()
+
+        pdf(paste0(folder,"dotplot_GOEnrich_CC_",name,".pdf"), width = 7, height = 7)
+       d<- dotplot(enrich_CC, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
+    print(d)
+    dev.off()
+    
     original_gene_list <- result_sign$log2FoldChange
     names(original_gene_list) <- result_sign$Row.names
     enrich_tmp<-setReadable(enrich_BP, 'org.Hs.eg.db', 'ENSEMBL')
