@@ -105,7 +105,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
 
     original_gene_list <- result_sign$log2FoldChange
     names(original_gene_list) <- result_sign$Row.names
-    enrich_tmp<-setReadable(enrich, 'org.Hs.eg.db', 'ENSEMBL')
+    enrich_tmp<-setReadable(enrich_BP, 'org.Hs.eg.db', 'ENSEMBL')
     cnet<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
     ggsave(
           paste0(folder,"cnet_", name, "_goEnrich.pdf"),
