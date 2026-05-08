@@ -15,7 +15,7 @@ plotPCA<-function(x,metadata, save_path){
   
   library(ggplot2)
   
-p <- ggplot(df, aes(Dim1, Dim2, color = s)) +
+p <- ggplot(df, aes(Dim1, Dim2, color = research)) +
   geom_point(size = 4) +
   geom_text(aes(label = label), vjust = -0.5) +
   theme_minimal()
