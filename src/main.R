@@ -1,8 +1,8 @@
 
-run_analyse <- function(folder, metadata_0_analyse, analyse_pairs=T, analyse_sex=T) {
+run_analyse <- function(folder, metadata_0_analyse, name, analyse_pairs=T, analyse_sex=T) {
     # limma
     x<-load_DGE(metadata_0_analyse,  "./htseq/") 
-    output_file<-paste0(folder, "limma", "pobranie1_vs_kontrola.csv")
+    output_file<-paste0(folder, "limma", name,".csv")
     run_0<-run_limma(x, metadata_0_analyse, output_file)
     
     length(which(run_0$adj.P.Val < 0.05))
@@ -15,7 +15,7 @@ run_analyse <- function(folder, metadata_0_analyse, analyse_pairs=T, analyse_sex
     run_0_deseq <- run_0_deseq[!is.na(run_0_deseq$padj),]
     length(which(run_0_deseq$padj < 0.05))
     
-    output_file<-paste0(folder, "deseq_", "pobranie1_vs_kontrola.csv")
+    output_file<-paste0(folder, "deseq_", name,".csv")
     write.csv2(run_0_deseq, output_file)
     tmp<-run_0_deseq[run_0_deseq$padj < 0.05,]
     tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
@@ -29,7 +29,7 @@ run_analyse <- function(folder, metadata_0_analyse, analyse_pairs=T, analyse_sex
     result_sign2 <- data.frame(lapply(result_sign, function(x) {
       if (is.list(x)) sapply(x, paste, collapse = ",") else x
     }))
-    output_file<-paste0(folder, "deseq_genes_info_", "pobranie1_vs_kontrola.csv")
+    output_file<-paste0(folder, "deseq_genes_info_", name,".csv")
     write.table(result_sign2, output_file, sep = ";", row.names = FALSE)
     
     
@@ -43,19 +43,19 @@ run_analyse <- function(folder, metadata_0_analyse, analyse_pairs=T, analyse_sex
     
     enrich<-enrichGO(result_sign)
     enrich<- as.data.frame(enrich)
-    output_file<-paste0(folder, "enrichmentGO_padj_0_05_", "pobranie1_vs_kontrola.csv")
+    output_file<-paste0(folder, "enrichmentGO_padj_0_05_", name,".csv")
     
     write.csv2(enrich, output_file)
     result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
     enrich_0<-enrichGO(result_sign)
     enrich_0_df<- as.data.frame(enrich_0)
-    output_file<-paste0(folder, "enrichmentGO_padj_0_05_lfc_1_", "pobranie1_vs_kontrola.csv")
+    output_file<-paste0(folder, "enrichmentGO_padj_0_05_lfc_1_", name,".csv")
     
     write.csv2(enrich_0_df, output_file)
     
     
     
-    pdf("goEnrich_0.pdf", width = 7, height = 7)
+    pdf(paste0(folder,"emmaplot_", name, "_goEnrich_0.pdf"), width = 7, height = 7)
     ego <- pairwise_termsim(enrich_0)
     emapplot(ego)
     dev.off()
