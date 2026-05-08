@@ -18,10 +18,9 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
         
     } else if (analyse_sex==T){
 
-    run_deseq<-run_deseq2(x, metadata)
-    deseq_res <- run_deseq[!is.na(run_deseq$padj),]
-        run_deseq<-deseq_res$res
-        dds<-deseq_res$dds
+    deseq_res<-run_deseq2(x, metadata)
+    run_deseq<-deseq_res$res
+    dds<-deseq_res$dds
 
     } else if (analyse_pairs==T){
 
@@ -87,7 +86,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     names(original_gene_list) <- result_sign$Row.names
     enrich_tmp<-setReadable(enrich, 'org.Hs.eg.db', 'ENSEMBL')
     cnet<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
-      ggsave(
+    ggsave(
           paste0(folder,"cnet_", name, "_goEnrich.pdf"),
         plot = cnet,
       )
