@@ -1,29 +1,53 @@
 
-run_analyse <- function(folder, metadata_0_analyse, name, analyse_pairs=T, analyse_sex=T) {
+run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) {
+    ah <-
     # limma
-    x<-load_DGE(metadata_0_analyse,  "./htseq/") 
+    x<-load_DGE(metadata,  "./htseq/") 
     output_file<-paste0(folder, "limma", name,".csv")
-    run_0<-run_limma(x, metadata_0_analyse, output_file)
+    run<-run_limma(x, metadata, output_file)
     
-    length(which(run_0$adj.P.Val < 0.05))
-    tmp<-run_0[run_0$adj.P.Val < 0.05,]
+    length(which(run$adj.P.Val < 0.05))
+    tmp<-run[run$adj.P.Val < 0.05,]
     tmp<-tmp[c(tmp$logFC < -1 | tmp$logFC >1),]
     nrow(tmp)
     
     #deseq2
-    run_0_deseq<-run_deseq2(x, metadata_0_analyse)
-    run_0_deseq <- run_0_deseq[!is.na(run_0_deseq$padj),]
-    length(which(run_0_deseq$padj < 0.05))
-    
-    output_file<-paste0(folder, "deseq_", name,".csv")
-    write.csv2(run_0_deseq, output_file)
-    tmp<-run_0_deseq[run_0_deseq$padj < 0.05,]
-    tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
-    nrow(tmp)
+
     
     # deseq2 with genes
+    if (analyse_pairs==T & analyse_sex==T){
+        
+    } else if (analyse_sex==T){
+
+    run_deseq<-run_deseq2(x, metadata)
+    run_deseq <- run_deseq[!is.na(run_deseq$padj),]
+
+    } else if (analyse_pairs==T){
+
+    # deseq2 with pairs
+    metadata <- metadata %>%
+      group_by(patient_id) %>%
+      filter(n_distinct(type) == 2)
+    x<-load_DGE(metadata,  "./htseq2/") 
+    run_deseq<-run_deseq2_paired(x, metadata)
+    }
+
     
-    result<-add_genes_info(run_0_deseq,ah)
+    lncRNA<-result_sign[result_sign$gene_biotype=="lncRNA",]
+    nrow(lncRNA)
+    nrow(lncRNA[lncRNA$log2FoldChange< -1,])
+    nrow(lncRNA[lncRNA$log2FoldChange>1,])
+    
+    run_deseq <- run_deseq[!is.na(run_deseq$padj),]
+    length(which(run_deseq$padj < 0.05))
+    output_file<-paste0(folder, "deseq_", name,".csv")
+    write.csv2(run_deseq, output_file)
+    tmp<-run_deseq[run_deseq$padj < 0.05,]
+    tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
+    nrow(tmp)
+
+        
+    result<-add_genes_info(run_deseq, ah)
     result[result$padj<0.05,] -> result_sign
     
     result_sign2 <- data.frame(lapply(result_sign, function(x) {
@@ -31,16 +55,13 @@ run_analyse <- function(folder, metadata_0_analyse, name, analyse_pairs=T, analy
     }))
     output_file<-paste0(folder, "deseq_genes_info_", name,".csv")
     write.table(result_sign2, output_file, sep = ";", row.names = FALSE)
+
     
-    
-    
-    lncRNA<-result_sign[result_sign$gene_biotype=="lncRNA",]
-    nrow(lncRNA)
-    nrow(lncRNA[lncRNA$log2FoldChange< -1,])
-    nrow(lncRNA[lncRNA$log2FoldChange>1,])
+    #plot PCA
+    output_file<-paste0(folder, "plotPCA_", name,".csv")
+    plotPCA(x, metadata, output_file)
     
     # enrichment GO
-    
     enrich<-enrichGO(result_sign)
     enrich<- as.data.frame(enrich)
     output_file<-paste0(folder, "enrichmentGO_padj_0_05_", name,".csv")
@@ -54,8 +75,7 @@ run_analyse <- function(folder, metadata_0_analyse, name, analyse_pairs=T, analy
     write.csv2(enrich_df, output_file)
     
     
-    
-    pdf(paste0(folder,"emmaplot_", name, "_goEnrich_0.pdf"), width = 7, height = 7)
+    pdf(paste0(folder,"emmaplot_", name, "_goEnrich.pdf"), width = 7, height = 7)
     ego <- pairwise_termsim(enrich)
     emapplot(ego)
     dev.off()
@@ -65,8 +85,25 @@ run_analyse <- function(folder, metadata_0_analyse, name, analyse_pairs=T, analy
     enrich_tmp<-setReadable(enrich, 'org.Hs.eg.db', 'ENSEMBL')
     cnet<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
       ggsave(
-          paste0(folder,"cnet_", name, "_goEnrich_0.pdf"),
+          paste0(folder,"cnet_", name, "_goEnrich.pdf"),
         plot = cnet,
       )
+
+
+    # enrichment KEGG
     
+    kegg<-runenrichKegg(result_sign, result_sign$gene_id, name)
+    
+    pdf(paste0(folder,"keggEnrich_",name,".pdf"), width = 7, height = 7)
+    dotplot(kegg, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
+    dev.off()
+    
+    
+    kegg_tmp<-setReadable(kegg, 'org.Hs.eg.db', 'ENTREZID')
+    cnet<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
+      ggsave(
+          paste0(folder,"cnet_", name, "_KEGGEnrich.pdf"),
+        plot = cnet,
+      )
+
 }
