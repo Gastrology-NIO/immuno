@@ -9,7 +9,7 @@ plotPCA<-function(x,metadata, save_path){
     Dim2 = mds$y,
     group = metadata$research, 
     label = metadata$probe_name,
-        s = metadata$s
+        research = metadata$research
 
   )
   
