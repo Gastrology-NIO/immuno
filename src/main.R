@@ -33,7 +33,6 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
         deseq_res<-run_deseq2_paired(x, metadata)
         run_deseq<-deseq_res$res
         dds<-deseq_res$dds
-        model <- dist_mat ~ patient_id + research
     }
 
     
@@ -63,7 +62,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     
     #plot PCA
     output_file<-paste0(folder, "plotPCA_", name,".svg")
-    plotPCA(dds, metadata, output_file, model)
+    plotPCA(dds, metadata, output_file, analyse_pairs=T, analyse_sex=T)
     
     # enrichment GO
     enrich<-enrichGO(result_sign)
