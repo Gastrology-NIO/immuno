@@ -39,8 +39,10 @@ run_deseq2<-function(x, metadata){
     res = results(diagdds, cooksCutoff = FALSE)
         res <- results(diagdds, contrast = c("research", "Searched", "Control"))
     res<-as(res, "data.frame")
-    return(res)
-}
+    return(list(
+        dds = dds,
+        res = res
+    ))}
 
 
 
@@ -59,7 +61,10 @@ run_deseq2_paired<-function(x, metadata){
     res = results(diagdds, cooksCutoff = FALSE)
         res <- results(diagdds, contrast = c("research", "Searched", "Control"))
     res<-as(res, "data.frame")
-    return(res)
+    return(list(
+        dds = dds,
+        res = res
+    ))
 }
 
 
