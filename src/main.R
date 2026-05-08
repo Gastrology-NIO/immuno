@@ -74,7 +74,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     
     result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
     enrich_BP<-enrichGO(result_sign, "BP")
-    enrich_BP_df<- as.data.frame(enrich)
+    enrich_BP_df<- as.data.frame(enrich_BP)
     output_file<-paste0(folder, "enrichmentGO_BP_padj_0_05_lfc_1_", name,".csv")
     write.csv2(enrich_BP_df, output_file)
 
@@ -84,7 +84,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     write.csv2(enrich_MF_df, output_file)
 
         enrich_CC<-enrichGO(result_sign, "CC")
-    enrich_CC_df<- as.data.frame(enrich)
+    enrich_CC_df<- as.data.frame(enrich_CC)
     output_file<-paste0(folder, "enrichmentGO_CC_padj_0_05_lfc_1_", name,".csv")
     write.csv2(enrich_CC_df, output_file)
     
