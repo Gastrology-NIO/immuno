@@ -96,6 +96,10 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     # enrichment KEGG
     
     kegg<-runenrichKegg(result_sign, result_sign$gene_id, name)
+      df<-as.data.frame(kegg)
+        output_file<-paste0(folder, "enrichmentKEGG_padj_0_05_", name,".csv")
+
+      write.csv2(df, output_file)
     
     pdf(paste0(folder,"keggEnrich_",name,".pdf"), width = 7, height = 7)
     dotplot(kegg, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
