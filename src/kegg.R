@@ -83,8 +83,7 @@ runenrichKegg<-function(res, original_gene_list, prefix){
                  pAdjustMethod = "fdr",
                   # keyType = "kegg"
                  keyType       = "ncbi-geneid")
-  df<-as.data.frame(kk2)
-  write.csv2(df, paste0(prefix, "_enrichKEGG.csv"))
+
   return(kk2)
 }
 plotDotPlot<-function(kk2, save_path){
