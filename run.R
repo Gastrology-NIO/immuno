@@ -151,14 +151,49 @@ pdf("goEnrich_1.pdf", width = 7, height = 7)
 ego <- pairwise_termsim(enrich_1)
 emapplot(ego)
 dev.off()
+
+
+
+enrich_1_paired<-enrichGO(result_sign)
 original_gene_list <- result_sign$log2FoldChange
 names(original_gene_list) <- result_sign$Row.names
-enrich_tmp<-setReadable(enrich_1, 'org.Hs.eg.db', 'ENSEMBL')
-cnet<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+enrich_tmp<-setReadable(enrich_1_paired, 'org.Hs.eg.db', 'ENSEMBL')
+cnet_go<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+
+
+
+enrich_1_paired_df<- as.data.frame(enrich_1_paired)
+write.csv2(enrich_1_paired, "./result/1 pobranie (3 miesiące vs powyżej 2 lat)_lfc.csv")
+
+
+kegg_1_paired<-runenrichKegg(result_sign, result_sign$gene_id, "1 pobranie (3 miesiące vs powyżej 2 lat)")
+original_gene_list <- result_sign$log2FoldChange
+names(original_gene_list) <- result_sign$entrezid
+enrich_tmp<-setReadable(kegg_1_paired, 'org.Hs.eg.db', 'ENTREZID')
+cnet_kegg<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+
+
+kegg_tmp<-setReadable(kegg_1_paired, 'org.Hs.eg.db', 'ENTREZID')
+cnet<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
   ggsave(
-    "goEnrich_genes_1pobranie_3miesiace_vs_powyżej_2_lat.svg",
+    "gokegg_genes_1 pobranie (3 miesiące vs powyżej 2 lat).svg",
     plot = cnet,
   )
+
+
+
+plots <-list()
+plots[[1]]<-cnet_go
+plots[[2]]<-cnet_kegg
+  p<-wrap_plots(plots, ncol = 2) +
+    plot_annotation(tag_levels = "A")
+ ggsave(
+       "enrichgokegg_genes_1 pobranie (3 miesiące vs powyżej 2 lat).svg",
+      plot = p,
+        width = 12, height = 6,
+
+  )
+
 
 
 # 1 pobranie (I linia vs kolejna linia)
@@ -398,12 +433,46 @@ cnet<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
     plot = cnet,
   )
 
-
 kegg_tmp<-setReadable(kegg_5, 'org.Hs.eg.db', 'ENTREZID')
 cnet<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
   ggsave(
     "gokegg_genes_2 pobranie (NtproBNP==1, 0).svg",
     plot = cnet,
+  )
+
+
+
+result<-add_genes_info(run_5_deseq, ah)
+result[result$padj<0.05,] -> result_sign
+enrich_5_paired<-enrichGO(result_sign)
+original_gene_list <- result_sign$log2FoldChange
+names(original_gene_list) <- result_sign$Row.names
+enrich_tmp<-setReadable(enrich_5_paired, 'org.Hs.eg.db', 'ENSEMBL')
+cnet_go<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+
+
+enrich_5_paired_df<- as.data.frame(enrich_5_paired)
+kegg_5_paired<-runenrichKegg(result_sign, result_sign$gene_id, "2 pobranie (NtproBNP==1, 0)")
+original_gene_list <- result_sign$log2FoldChange
+names(original_gene_list) <- result_sign$entrezid
+enrich_tmp<-setReadable(kegg_5_paired, 'org.Hs.eg.db', 'ENTREZID')
+cnet_kegg<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+kegg_tmp<-setReadable(kegg_5_paired, 'org.Hs.eg.db', 'ENTREZID')
+cnet<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
+  ggsave(
+    "gokegg_genes_2 pobranie (NtproBNP==1, 0).svg",
+    plot = cnet,
+  )
+
+plots <-list()
+plots[[1]]<-cnet_go
+plots[[2]]<-cnet_kegg
+  p<-wrap_plots(plots, ncol = 2) +
+    plot_annotation(tag_levels = "A")
+ ggsave(
+       "enrichgokegg_genes2 pobranie (NtproBNP==1, 0).svg",
+      plot = p,
+        width = 12, height = 6,
   )
 
 summary_tu_deseq <-function(deseq2_res, prefix){
