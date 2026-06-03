@@ -252,28 +252,24 @@ length(which(run_4_deseq_paired$padj < 0.05))
 
 result<-add_genes_info(run_4_deseq_paired, ah)
 result[result$padj<0.05,] -> result_sign
+
 enrich_4_paired<-enrichGO(result_sign)
+original_gene_list <- result_sign$log2FoldChange
+names(original_gene_list) <- result_sign$Row.names
+enrich_tmp<-setReadable(enrich_4_paired, 'org.Hs.eg.db', 'ENSEMBL')
+cnet_go<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+
+
+
 enrich_4_paired_df<- as.data.frame(enrich_4_paired)
 write.csv2(enrich_4_paired, "./result/NtproBNP==1 (1 pobranie vs 2 pobranie)_lfc.csv")
 
 
 kegg_4_paired<-runenrichKegg(result_sign, result_sign$gene_id, "NtproBNP==1 (1 pobranie vs 2 pobranie)")
-pdf("keggEnrich_NtproBNP==1 (1 pobranie vs 2 pobranie).pdf", width = 7, height = 7)
-dotplot(kegg_4_paired, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
-dev.off()
-
-pdf("goEnrich_NtproBNP==1 (1 pobranie vs 2 pobranie).pdf", width = 7, height = 7)
-ego <- pairwise_termsim(enrich_4_paired)
-emapplot(ego)
-dev.off()
 original_gene_list <- result_sign$log2FoldChange
-names(original_gene_list) <- result_sign$Row.names
-enrich_tmp<-setReadable(enrich_4_paired, 'org.Hs.eg.db', 'ENSEMBL')
-cnet<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
-  ggsave(
-    "goEnrich_genes_NtproBNP==1 (1 pobranie vs 2 pobranie).svg",
-    plot = cnet,
-  )
+names(original_gene_list) <- result_sign$entrezid
+enrich_tmp<-setReadable(kegg_4_paired, 'org.Hs.eg.db', 'ENTREZID')
+cnet_kegg<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
 
 
 kegg_tmp<-setReadable(kegg_4_paired, 'org.Hs.eg.db', 'ENTREZID')
@@ -285,14 +281,17 @@ cnet<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
 
 
 
+plots <-list()
+plots[[1]]<-cnet_go
+plots[[2]]<-cnet_kegg
+  p<-wrap_plots(plots, ncol = 2) +
+    plot_annotation(tag_levels = "A")
+ ggsave(
+       "enrichgokegg_genes_NtproBNP==1 (1 pobranie vs 2 pobranie).svg",
+      plot = p,
+        width = 12, height = 6,
 
-
-
-
-
-
-
-
+  )
 
 
 
