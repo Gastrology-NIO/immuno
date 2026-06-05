@@ -130,13 +130,25 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     original_gene_list <- result_sign$log2FoldChange
     names(original_gene_list) <- result_sign$Row.names
     enrich_tmp<-setReadable(enrich_BP, 'org.Hs.eg.db', 'ENSEMBL')
-    cnet<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+    cnet_BP<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
     ggsave(
           paste0(folder,"cnet_", name, "_goEnrich.pdf"),
-        plot = cnet,
+        plot = cnet_BP,
       )
 
+    enrich_tmp<-setReadable(enrich_MF, 'org.Hs.eg.db', 'ENSEMBL')
+    cnet_MF<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+    ggsave(
+          paste0(folder,"cnet_", name, "_MF_goEnrich.pdf"),
+        plot = cnet_MF,
+      )
 
+        enrich_tmp<-setReadable(enrich_CC, 'org.Hs.eg.db', 'ENSEMBL')
+    cnet_CC<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+    ggsave(
+          paste0(folder,"cnet_", name, "_cc_goEnrich.pdf"),
+        plot = cnet_CC,
+      )
     # enrichment KEGG
     
     kegg<-runenrichKegg(result_sign, result_sign$gene_id, name)
@@ -154,10 +166,10 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     
     original_gene_list <- result_sign$log2FoldChange
     names(original_gene_list) <- result_sign$entrezid
-    cnet<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
+    cnet_kegg<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
       ggsave(
           paste0(folder,"cnet_", name, "_KEGGEnrich.pdf"),
-        plot = cnet,
+        plot = cnet_kegg,
       )
     
       plots <-list()
@@ -173,4 +185,17 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
               width = 12, height = 6,
         )
            
+      plots <-list()
+      plots[[1]]<-cnet_BP
+      plots[[2]]<-cnet_MF
+      plots[[3]]<-cnet_CC
+      plots[[4]]<-cnet_kegg
+        p<-wrap_plots(plots, ncol = 2) +
+          plot_annotation(tag_levels = "A")
+       ggsave(
+             paste0("enrichgokegg_genes_Cnet_",research_name,".svg",
+            plot = p,
+              width = 12, height = 6,
+        )
+               
 }
