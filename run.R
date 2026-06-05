@@ -64,7 +64,37 @@ result_sign2 <- data.frame(lapply(result_sign, function(x) {
 
 write.table(result_sign2, "1 pobranie VS kontrola.csv", sep = ";", row.names = FALSE)
 
+library(ggVennDiagram)
+sig_genes <- rownames(result[result$padj < 0.05, ])
 
+# próbki w grupach
+control_samples <- metadata$files[metadata$research == "Control"]
+searched_samples <- metadata$files[metadata$research == "Searched"]
+
+# macierz zliczeń z DGE
+counts <- x$counts
+
+# tylko geny istotne
+counts_sig <- counts[rownames(counts) %in% sig_genes, ]
+
+# geny obecne w kontrolach
+control_genes <- rownames(counts_sig)[
+  rowSums(counts_sig[, control_samples, drop = FALSE] > 0) > 0
+]
+
+# geny obecne w badanych
+searched_genes <- rownames(counts_sig)[
+  rowSums(counts_sig[, searched_samples, drop = FALSE] > 0) > 0
+]
+
+p <- ggVennDiagram(
+  list(
+    control = searched_genes,
+    searched = control_genes
+  )
+)
+
+ggsave("venn_DEGs.svg", p, width = 6, height = 6)
 
 
 lncRNA<-result_sign[result_sign$gene_biotype=="lncRNA",]
