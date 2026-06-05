@@ -152,7 +152,8 @@ ego <- pairwise_termsim(enrich_1)
 emapplot(ego)
 dev.off()
 
-
+result<-add_genes_info(run_1_deseq, ah)
+result[result$padj<0.05,] -> result_sign
 go_kegg_cbnet(result_sign, "1 pobranie (3 miesiące vs powyżej 2 lat)")
   
 go_kegg_cbnet<-function(result_sign, research_name){
@@ -329,6 +330,9 @@ plots[[2]]<-cnet_kegg
   )
 
 
+result<-add_genes_info(run_4_deseq, ah)
+result[result$padj<0.05,] -> result_sign
+go_kegg_cbnet(result_sign, "NtproBNP==1 (1 pobranie vs 2 pobranie)")
 
 
 
@@ -475,6 +479,11 @@ plots[[2]]<-cnet_kegg
         width = 12, height = 6,
   )
 
+result<-add_genes_info(run_5_deseq, ah)
+result[result$padj<0.05,] -> result_sign
+go_kegg_cbnet(result_sign, "2 pobranie (NtproBNP==1, 0)")
+     
+
 summary_tu_deseq <-function(deseq2_res, prefix){
     result<-add_genes_info(deseq2_res, ah)
     result[result$padj<0.05,] -> result_sign
@@ -581,6 +590,9 @@ dev.off()
 
 result<-add_genes_info(run_4_deseq, ah)
 result[result$padj<0.05,] -> result_sign
+
+
+     
 # enrich<-enrichGO(result_sign)
 # enrich<- as.data.frame(enrich)
 write.csv2(enrich, "./result/NtproBNP_1_pobranie_vs_2_pobranie_enrich_padj_0_05_logfc.csv")
@@ -943,6 +955,5 @@ x$samples$lib.size
 y<-get_voom(x, metadata_5_analyse)
 count_5<-as.data.frame(x$counts)
 
-                
 
                 
