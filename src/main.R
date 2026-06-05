@@ -112,19 +112,19 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     dev.off()
     
     pdf(paste0(folder,"dotplot_GOEnrich_BP_",name,".pdf"), width = 7, height = 7)
-       d<- dotplot(enrich_BP, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
-    print(d)
+       d_bp<- dotplot(enrich_BP, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
+    print(d_bp)
     dev.off()
 
     pdf(paste0(folder,"dotplot_GOEnrich_MF_",name,".pdf"), width = 7, height = 7)
-       d<- dotplot(enrich_MF, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
-    print(d)
+       d_mf<- dotplot(enrich_MF, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
+    print(d_mf)
     dev.off()
     if (nrow(enrich_CC_df)> 1){
 
         pdf(paste0(folder,"dotplot_GOEnrich_CC_",name,".pdf"), width = 7, height = 7)
-       d<- dotplot(enrich_CC, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
-    print(d)
+       d_CC<- dotplot(enrich_CC, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
+    print(d_CC)
     dev.off()
     }
     original_gene_list <- result_sign$log2FoldChange
@@ -145,8 +145,8 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     write.csv2(df, output_file)
     
     pdf(paste0(folder,"dotplot_keggEnrich_",name,".pdf"), width = 7, height = 7)
-       d<- dotplot(kegg, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
-    print(d)
+       d_kegg<- dotplot(kegg, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
+    print(d_kegg)
     dev.off()
     
     
@@ -159,5 +159,18 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
           paste0(folder,"cnet_", name, "_KEGGEnrich.pdf"),
         plot = cnet,
       )
-
+    
+      plots <-list()
+      plots[[1]]<-d_bp
+      plots[[2]]<-d_mf
+      plots[[3]]<-d_CC
+      plots[[4]]<-d_kegg
+        p<-wrap_plots(plots, ncol = 2) +
+          plot_annotation(tag_levels = "A")
+       ggsave(
+             paste0("enrichgokegg_genes_dotplot_",name,".svg",
+            plot = p,
+              width = 12, height = 6,
+        )
+           
 }
