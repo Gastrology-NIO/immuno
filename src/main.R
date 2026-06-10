@@ -90,7 +90,6 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     library(dplyr)
     if (max_genes>0){
     # wybór 5 kategorii, które będą pokazane
-    enrich_CC@result <- enrich_CC@result[1:5, ]
     
     # dla każdej kategorii zostaw top20 genów wg |logFC|
     enrich_CC@result$geneID <- sapply(
@@ -106,8 +105,6 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
         paste(top_genes, collapse = "/")
       }
     )
-
-        enrich_MF@result <- enrich_MF@result[1:5, ]
     
     # dla każdej kategorii zostaw top20 genów wg |logFC|
     enrich_MF@result$geneID <- sapply(
@@ -123,8 +120,6 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
         paste(top_genes, collapse = "/")
       }
     )
-
-            enrich_BP@result <- enrich_MF@result[1:5, ]
     
     # dla każdej kategorii zostaw top20 genów wg |logFC|
     enrich_BP@result$geneID <- sapply(
