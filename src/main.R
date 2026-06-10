@@ -1,5 +1,5 @@
 
-run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, max_genes=0) {
+run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, max_genes=0, max_categories=5) {
     # limma
     x<-load_DGE(metadata,  "./htseq/") 
     output_file<-paste0(folder, "limma", name,".csv")
@@ -86,55 +86,47 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     enrich_CC_df<- as.data.frame(enrich_CC)
     output_file<-paste0(folder, "enrichmentGO_CC_padj_0_05_lfc_1_", name,".csv")
     write.csv2(enrich_CC_df, output_file)
+    kegg<-runenrichKegg(result_sign, result_sign$gene_id, name)
 
     library(dplyr)
     if (max_genes>0){
-    # wybór 5 kategorii, które będą pokazane
-    
-    # dla każdej kategorii zostaw top20 genów wg |logFC|
-    enrich_CC@result$geneID <- sapply(
-      enrich_CC@result$geneID,
-      function(x) {
-        genes <- unlist(strsplit(x, "/"))
-    
-        genes_fc <- original_gene_list[genes]
-    
-        top_genes <- names(sort(abs(genes_fc),
-                                decreasing = TRUE))[1:min(20, length(genes_fc))]
-    
-        paste(top_genes, collapse = "/")
-      }
-    )
-    
-    # dla każdej kategorii zostaw top20 genów wg |logFC|
-    enrich_MF@result$geneID <- sapply(
-      enrich_MF@result$geneID,
-      function(x) {
-        genes <- unlist(strsplit(x, "/"))
-    
-        genes_fc <- original_gene_list[genes]
-    
-        top_genes <- names(sort(abs(genes_fc),
-                                decreasing = TRUE))[1:min(20, length(genes_fc))]
-    
-        paste(top_genes, collapse = "/")
-      }
-    )
-    
-    # dla każdej kategorii zostaw top20 genów wg |logFC|
-    enrich_BP@result$geneID <- sapply(
-      enrich_BP@result$geneID,
-      function(x) {
-        genes <- unlist(strsplit(x, "/"))
-    
-        genes_fc <- original_gene_list[genes]
-    
-        top_genes <- names(sort(abs(genes_fc),
-                                decreasing = TRUE))[1:min(20, length(genes_fc))]
-    
-        paste(top_genes, collapse = "/")
-      }
-    )
+            for (i in  1:length(enrich_BP@result$geneID)){
+            	genes_list<-unlist(strsplit(enrich_BP@result$geneID[i], "/"))
+            	genes_lFC<-result_sign[result_sign$Row.names %in% genes_list,]
+            	top20 <- head(
+              genes_lFC[order(abs(genes_lFC$log2FoldChange), decreasing = TRUE), "Row.names"],
+              max_genes
+            )
+            enrich_BP@result$geneID<-paste(top20, collapse = "/")
+            }    
+        
+            for (i in  1:length(enrich_MF@result$geneID)){
+            	genes_list<-unlist(strsplit(enrich_MF@result$geneID[i], "/"))
+            	genes_lFC<-result_sign[result_sign$Row.names %in% genes_list,]
+            	top20 <- head(
+              genes_lFC[order(abs(genes_lFC$log2FoldChange), decreasing = TRUE), "Row.names"],
+              max_genes
+            )
+            	enrich_MF@result$geneID<-paste(top20, collapse = "/")
+            }    
+                    for (i in  1:length(enrich_CC@result$geneID)){
+            	genes_list<-unlist(strsplit(enrich_CC@result$geneID[i], "/"))
+            	genes_lFC<-result_sign[result_sign$Row.names %in% genes_list,]
+            	top20 <- head(
+              genes_lFC[order(abs(genes_lFC$log2FoldChange), decreasing = TRUE), "Row.names"],
+              max_genes
+            )
+            	enrich_CC@result$geneID<-paste(top20, collapse = "/")
+            }    
+                            for (i in  1:length(kegg@result$geneID)){
+            	genes_list<-unlist(strsplit(kegg@result$geneID[i], "/"))
+            	genes_lFC<-result_sign[result_sign$Row.names %in% genes_list,]
+            	top20 <- head(
+              genes_lFC[order(abs(genes_lFC$log2FoldChange), decreasing = TRUE), "Row.names"],
+              max_genes
+            )
+            	kegg@result$geneID<-paste(top20, collapse = "/")
+            }    
     }
     
     ego <- pairwise_termsim(enrich_BP)
@@ -180,7 +172,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     names(original_gene_list) <- result_sign$Row.names
     if (nrow(enrich_BP)>1){
             enrich_tmp<-setReadable(enrich_BP, 'org.Hs.eg.db', 'ENSEMBL')
-            cnet_BP<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+            cnet_BP<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=max_categories)
             ggsave(
                   paste0(folder,"cnet_", name, "_goEnrich.pdf"),
                 plot = cnet_BP,
@@ -190,7 +182,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     if (nrow(enrich_MF)>1){
         enrich_tmp<-setReadable(enrich_MF, 'org.Hs.eg.db', 'ENSEMBL')
 
-        cnet_MF<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+        cnet_MF<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=max_categories)
         ggsave(
               paste0(folder,"cnet_", name, "_MF_goEnrich.pdf"),
             plot = cnet_MF,
@@ -199,7 +191,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     
     if (nrow(enrich_CC)>1){
         enrich_tmp<-setReadable(enrich_CC, 'org.Hs.eg.db', 'ENSEMBL')
-    cnet_CC<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+    cnet_CC<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=max_categories)
     ggsave(
           paste0(folder,"cnet_", name, "_cc_goEnrich.pdf"),
         plot = cnet_CC,
@@ -207,7 +199,6 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
         }
     # enrichment KEGG
     
-    kegg<-runenrichKegg(result_sign, result_sign$gene_id, name)
     df<-as.data.frame(kegg)
         output_file<-paste0(folder, "enrichmentKEGG_padj_0_05_", name,".csv")
     write.csv2(df, output_file)
