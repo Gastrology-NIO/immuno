@@ -75,7 +75,7 @@ runenrichKegg<-function(res, original_gene_list, prefix){
   kegg_gene_list = sort(kegg_gene_list, decreasing = TRUE)
   kegg_gene_list <- kegg_gene_list[!duplicated(names(kegg_gene_list))]
   kegg_gene_list <- sort(kegg_gene_list, decreasing = TRUE)
-  kk2 <- enrichKEGG(names(kegg_gene_list),
+  kk2 <- clusterProfiler::enrichKEGG(names(kegg_gene_list),
                  organism     = 'hsa',
                  minGSSize    = 3,
                  maxGSSize    = 800,
