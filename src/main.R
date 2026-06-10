@@ -1,5 +1,5 @@
 
-run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) {
+run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, max_genes=0) {
     # limma
     x<-load_DGE(metadata,  "./htseq/") 
     output_file<-paste0(folder, "limma", name,".csv")
@@ -86,6 +86,61 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     enrich_CC_df<- as.data.frame(enrich_CC)
     output_file<-paste0(folder, "enrichmentGO_CC_padj_0_05_lfc_1_", name,".csv")
     write.csv2(enrich_CC_df, output_file)
+
+    library(dplyr)
+    if (max_genes>0){
+    # wybór 5 kategorii, które będą pokazane
+    enrich_CC@result <- enrich_CC@result[1:5, ]
+    
+    # dla każdej kategorii zostaw top20 genów wg |logFC|
+    enrich_CC@result$geneID <- sapply(
+      enrich_CC@result$geneID,
+      function(x) {
+        genes <- unlist(strsplit(x, "/"))
+    
+        genes_fc <- original_gene_list[genes]
+    
+        top_genes <- names(sort(abs(genes_fc),
+                                decreasing = TRUE))[1:min(20, length(genes_fc))]
+    
+        paste(top_genes, collapse = "/")
+      }
+    )
+
+        enrich_MF@result <- enrich_MF@result[1:5, ]
+    
+    # dla każdej kategorii zostaw top20 genów wg |logFC|
+    enrich_MF@result$geneID <- sapply(
+      enrich_MF@result$geneID,
+      function(x) {
+        genes <- unlist(strsplit(x, "/"))
+    
+        genes_fc <- original_gene_list[genes]
+    
+        top_genes <- names(sort(abs(genes_fc),
+                                decreasing = TRUE))[1:min(20, length(genes_fc))]
+    
+        paste(top_genes, collapse = "/")
+      }
+    )
+
+            enrich_BP@result <- enrich_MF@result[1:5, ]
+    
+    # dla każdej kategorii zostaw top20 genów wg |logFC|
+    enrich_BP@result$geneID <- sapply(
+      enrich_BP@result$geneID,
+      function(x) {
+        genes <- unlist(strsplit(x, "/"))
+    
+        genes_fc <- original_gene_list[genes]
+    
+        top_genes <- names(sort(abs(genes_fc),
+                                decreasing = TRUE))[1:min(20, length(genes_fc))]
+    
+        paste(top_genes, collapse = "/")
+      }
+    )
+    }
     
     ego <- pairwise_termsim(enrich_BP)
     e1<-emapplot(ego)
