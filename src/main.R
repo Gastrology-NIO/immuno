@@ -111,43 +111,50 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     dev.off()
     
     pdf(paste0(folder,"dotplot_GOEnrich_BP_",name,".pdf"), width = 7, height = 7)
-       d_bp<- dotplot(enrich_BP, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
+       d_bp<- dotplot(enrich_BP, showCategory=30, label_format=NULL) + ggtitle("Biological Process enrichment")
     print(d_bp)
     dev.off()
 
     pdf(paste0(folder,"dotplot_GOEnrich_MF_",name,".pdf"), width = 7, height = 7)
-       d_mf<- dotplot(enrich_MF, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
+       d_mf<- dotplot(enrich_MF, showCategory=30, label_format=NULL) + ggtitle("Molecular Function enrichment")
     print(d_mf)
     dev.off()
     if (nrow(enrich_CC_df)> 1){
-
         pdf(paste0(folder,"dotplot_GOEnrich_CC_",name,".pdf"), width = 7, height = 7)
-       d_CC<- dotplot(enrich_CC, showCategory=30, label_format=NULL) + ggtitle("dotplot for GO enrichment")
-    print(d_CC)
-    dev.off()
+       d_CC<- dotplot(enrich_CC, showCategory=30, label_format=NULL) + ggtitle("Cellular Component enrichment")
+        print(d_CC)
+        dev.off()
     }
+    
     original_gene_list <- result_sign$log2FoldChange
     names(original_gene_list) <- result_sign$Row.names
-    enrich_tmp<-setReadable(enrich_BP, 'org.Hs.eg.db', 'ENSEMBL')
-    cnet_BP<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
-    ggsave(
-          paste0(folder,"cnet_", name, "_goEnrich.pdf"),
-        plot = cnet_BP,
-      )
+    if (nrow(enrich_BP)>1){
+            enrich_tmp<-setReadable(enrich_BP, 'org.Hs.eg.db', 'ENSEMBL')
+            cnet_BP<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+            ggsave(
+                  paste0(folder,"cnet_", name, "_goEnrich.pdf"),
+                plot = cnet_BP,
+              )
+    }
+    
+    if (nrow(enrich_MF)>1){
+        enrich_tmp<-setReadable(enrich_MF, 'org.Hs.eg.db', 'ENSEMBL')
 
-    enrich_tmp<-setReadable(enrich_MF, 'org.Hs.eg.db', 'ENSEMBL')
-    cnet_MF<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
-    ggsave(
-          paste0(folder,"cnet_", name, "_MF_goEnrich.pdf"),
-        plot = cnet_MF,
-      )
-
+        cnet_MF<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
+        ggsave(
+              paste0(folder,"cnet_", name, "_MF_goEnrich.pdf"),
+            plot = cnet_MF,
+          )
+    }
+    
+    if (nrow(enrich_CC)>1){
         enrich_tmp<-setReadable(enrich_CC, 'org.Hs.eg.db', 'ENSEMBL')
     cnet_CC<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=5)
     ggsave(
           paste0(folder,"cnet_", name, "_cc_goEnrich.pdf"),
         plot = cnet_CC,
       )
+        }
     # enrichment KEGG
     
     kegg<-runenrichKegg(result_sign, result_sign$gene_id, name)
@@ -156,7 +163,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     write.csv2(df, output_file)
     
     pdf(paste0(folder,"dotplot_keggEnrich_",name,".pdf"), width = 7, height = 7)
-       d_kegg<- dotplot(kegg, showCategory=30, label_format=NULL) + ggtitle("dotplot for kegg enrichment")
+       d_kegg<- dotplot(kegg, showCategory=30, label_format=NULL) + ggtitle("KEGG enrichment")
     print(d_kegg)
     dev.off()
     
@@ -172,24 +179,45 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
       )
     
       plots <- list()
-      plots[[1]]<-d_bp
-      plots[[2]]<-d_mf
-      plots[[3]]<-d_CC
-      plots[[4]]<-d_kegg
+    id=1
+    if (nrow(enrich_BP)>1){
+      plots[[id]]<-d_bp
+        id<-id+1
+    }
+    if (nrow(enrich_MF)>1){
+          plots[[id]]<-d_mf
+            id<-id+1
+    }
+    if (nrow(enrich_CC)>1){
+        plots[[id]]<-d_CC
+        id<-id+1
+    }
+      plots[[id]]<-d_kegg
         p<-wrap_plots(plots, ncol = 2) +
           plot_annotation(tag_levels = "A")
        ggsave(
              paste0("enrichgokegg_genes_dotplot_",name,".svg"),
             plot = p,
-              width = 12, height = 12,
+              width = 18, height = 12,
         )
     print(paste0("enrichgokegg_genes_dotplot_",name,".svg"))
            
-      plots <-list()
-      plots[[1]]<-cnet_BP
-      plots[[2]]<-cnet_MF
-      plots[[3]]<-cnet_CC
-      plots[[4]]<-cnet_kegg
+    plots <-list()
+    id=1
+    if (nrow(enrich_BP)>1){
+        plots[[id]]<-cnet_BP
+        id<-id+1
+    }
+    if (nrow(enrich_MF)>1){
+      plots[[id]]<-cnet_MF
+    id<-id+1
+    }
+    if (nrow(enrich_CC)>1){
+          plots[[id]]<-cnet_CC
+        id<-id+1
+
+        }
+      plots[[id]]<-cnet_kegg
         p<-wrap_plots(plots, ncol = 2) +
           plot_annotation(tag_levels = "A")
        ggsave(
