@@ -38,10 +38,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     }
 
     
-    lncRNA<-result_sign[result_sign$gene_biotype=="lncRNA",]
-    nrow(lncRNA)
-    nrow(lncRNA[lncRNA$log2FoldChange< -1,])
-    nrow(lncRNA[lncRNA$log2FoldChange>1,])
+
     
     run_deseq <- run_deseq[!is.na(run_deseq$padj),]
     length(which(run_deseq$padj < 0.05))
@@ -51,10 +48,12 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
     nrow(tmp)
 
-        
     result<-add_genes_info(run_deseq, ah)
     result[result$padj<0.05,] -> result_sign
-    
+    lncRNA<-result_sign[result_sign$gene_biotype=="lncRNA",]
+    nrow(lncRNA)
+    nrow(lncRNA[lncRNA$log2FoldChange< -1,])
+    nrow(lncRNA[lncRNA$log2FoldChange>1,])
     result_sign2 <- data.frame(lapply(result_sign, function(x) {
       if (is.list(x)) sapply(x, paste, collapse = ",") else x
     }))
