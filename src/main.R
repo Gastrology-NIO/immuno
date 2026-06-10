@@ -193,10 +193,10 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
         p<-wrap_plots(plots, ncol = 2) +
           plot_annotation(tag_levels = "A")
        ggsave(
-             paste0("enrichgokegg_genes_Cnet_",research_name,".svg"),
+             paste0("enrichgokegg_genes_Cnet_",name,".svg"),
             plot = p,
               width = 12, height = 6,
         )
-    print(paste0("enrichgokegg_genes_Cnet_",research_name,".svg"))
+    print(paste0("enrichgokegg_genes_Cnet_",name,".svg"))
                
 }
