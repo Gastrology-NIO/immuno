@@ -167,12 +167,12 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
     original_gene_list <- result_sign$log2FoldChange
     names(original_gene_list) <- result_sign$entrezid
     cnet_kegg<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
-      ggsave(
+    ggsave(
           paste0(folder,"cnet_", name, "_KEGGEnrich.pdf"),
-        plot = cnet_kegg,
+        plot = cnet_kegg
       )
     
-      plots <-list()
+      plots <- list()
       plots[[1]]<-d_bp
       plots[[2]]<-d_mf
       plots[[3]]<-d_CC
@@ -180,7 +180,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
         p<-wrap_plots(plots, ncol = 2) +
           plot_annotation(tag_levels = "A")
        ggsave(
-             paste0("enrichgokegg_genes_dotplot_",name,".svg",
+             paste0("enrichgokegg_genes_dotplot_",name,".svg"),
             plot = p,
               width = 12, height = 6,
         )
@@ -193,7 +193,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
         p<-wrap_plots(plots, ncol = 2) +
           plot_annotation(tag_levels = "A")
        ggsave(
-             paste0("enrichgokegg_genes_Cnet_",research_name,".svg",
+             paste0("enrichgokegg_genes_Cnet_",research_name,".svg"),
             plot = p,
               width = 12, height = 6,
         )
