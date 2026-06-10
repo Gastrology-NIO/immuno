@@ -17,7 +17,7 @@ source("./src/load_data.R")
 
 
 metadata<-load_data_meta("./data/metadata_jag.csv")
-gene_counts<-load_data_counts("./htseq/", "./data/gene_counts.csv")
+gene_counts<-load_data_counts("./htseq/", "./data/gene_counts.csv", metadata)
 
 
 
