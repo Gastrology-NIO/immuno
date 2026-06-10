@@ -78,23 +78,17 @@ counts <- x$counts
 
 # tylko geny istotne
 counts_sig <- counts[rownames(counts), ]
-counts_sig <- counts_sig %>%
-  as.data.frame() %>% 
-  mutate(across(where(is.numeric), ~ round((. / sum(.)) * 100, 2)))
-# geny obecne w kontrolach
-searched_genes <- rownames(counts_sig)[
-  rowSums(counts_sig[, control_samples, drop = FALSE] > 0.01) > 0
-]
+
 
 # geny obecne w badanych
 searched_genes <- rownames(counts_sig)[
   rowSums(counts_sig[, searched_samples, drop = FALSE] > 0) > 0
 ]
 
-p <- ggVennDiagram(
+p <- ggvenn(
   list(
-    control = searched_genes,
-    searched = control_genes
+    control = control_genes,
+    searched =searched_genes 
   )
 )
 
