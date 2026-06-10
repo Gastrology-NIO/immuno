@@ -46,6 +46,7 @@ nrow(tmp)
 
 
 run_0_deseq<-run_deseq2(x, metadata_0_analyse)
+run_0_deseq<-run_0_deseq$res
 run_0_deseq <- run_0_deseq[!is.na(run_0_deseq$padj),]
 length(which(run_0_deseq$padj < 0.05))
 
@@ -65,11 +66,12 @@ result_sign2 <- data.frame(lapply(result_sign, function(x) {
 write.table(result_sign2, "1 pobranie VS kontrola.csv", sep = ";", row.names = FALSE)
 
 library(ggVennDiagram)
-sig_genes <- rownames(result[result$padj < 0.05, ])
+sig_genes <- result[result$padj < 0.05, ]
+sig_genes<-sig_genes$Row.names
 
 # próbki w grupach
-control_samples <- metadata$files[metadata$research == "Control"]
-searched_samples <- metadata$files[metadata$research == "Searched"]
+control_samples <- metadata_0_analyse$probe_name[metadata_0_analyse$research == "Control"]
+searched_samples <- metadata_0_analyse$probe_name[metadata_0_analyse$research == "Searched"]
 
 # macierz zliczeń z DGE
 counts <- x$counts
