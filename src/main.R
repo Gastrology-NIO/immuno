@@ -181,7 +181,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
        ggsave(
              paste0("enrichgokegg_genes_dotplot_",name,".svg"),
             plot = p,
-              width = 12, height = 6,
+              width = 12, height = 12,
         )
     print(paste0("enrichgokegg_genes_dotplot_",name,".svg"))
            
@@ -195,7 +195,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
        ggsave(
              paste0("enrichgokegg_genes_Cnet_",name,".svg"),
             plot = p,
-              width = 12, height = 6,
+              width = 12, height = 12,
         )
     print(paste0("enrichgokegg_genes_Cnet_",name,".svg"))
                
