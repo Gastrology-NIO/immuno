@@ -184,6 +184,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
             plot = p,
               width = 12, height = 6,
         )
+    print(paste0("enrichgokegg_genes_dotplot_",name,".svg"))
            
       plots <-list()
       plots[[1]]<-cnet_BP
@@ -197,5 +198,6 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T) 
             plot = p,
               width = 12, height = 6,
         )
+    print(paste0("enrichgokegg_genes_Cnet_",research_name,".svg"))
                
 }
