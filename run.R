@@ -77,11 +77,13 @@ searched_samples <- metadata_0_analyse$probe_name[metadata_0_analyse$research ==
 counts <- x$counts
 
 # tylko geny istotne
-counts_sig <- counts[rownames(counts) %in% sig_genes, ]
-
+counts_sig <- counts[rownames(counts), ]
+counts_sig <- counts_sig %>%
+  as.data.frame() %>% 
+  mutate(across(where(is.numeric), ~ round((. / sum(.)) * 100, 2)))
 # geny obecne w kontrolach
-control_genes <- rownames(counts_sig)[
-  rowSums(counts_sig[, control_samples, drop = FALSE] > 0) > 0
+searched_genes <- rownames(counts_sig)[
+  rowSums(counts_sig[, control_samples, drop = FALSE] > 0.01) > 0
 ]
 
 # geny obecne w badanych
