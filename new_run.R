@@ -9,8 +9,9 @@ metadata_0_analyse$research<-metadata_0_analyse$type
 metadata_0_analyse$research[metadata_0_analyse$type=='kontrola']<-"Control"
 metadata_0_analyse$research[metadata_0_analyse$type=='Pobranie 1']<-"Searched"
 metadata_0_analyse<- metadata_0_analyse[metadata_0_analyse$probe_name != "",]
-run_analyse(folder, metadata_0_analyse, name, analyse_pairs=F, analyse_sex=T, max_genes=20, max_categories=10)
-
+run_analyse(folder, metadata_0_analyse, name, analyse_pairs=F, analyse_sex=T, max_genes=20, max_categories=5)
+run_analyse(folder, metadata_0_analyse, paste0(name, "_2"), analyse_pairs=F, analyse_sex=T)
+run_analyse(folder, metadata_0_analyse, paste0(name, "_3"), analyse_pairs=F, analyse_sex=T, max_categories=5)
 
 folder<-"./result/pobranie1_vs_kontrola/"
 
