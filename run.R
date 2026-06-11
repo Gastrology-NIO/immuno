@@ -87,13 +87,23 @@ searched_genes <- rownames(counts_sig)[
 
 p <- ggvenn(
   list(
-    control = control_genes,
-    searched =searched_genes 
+    "Early-stage NSCLC" = control_genes,
+    "Advanced NSCLC" =searched_genes 
   )
 )
 
 ggsave("venn_DEGs.svg", p, width = 6, height = 6)
 
+
+p <-ggvenn(
+  list(
+    "Early-stage NSCLC" = control_genes,
+    "Advanced NSCLC" =searched_genes 
+  ),
+  fill_color = c("#E41A1C", "#377EB8"),
+  stroke_size = 0
+)
+ggsave("venn_DEGs_E41A1C_377EB8.svg", p, width = 6, height = 6)
 
 lncRNA<-result_sign[result_sign$gene_biotype=="lncRNA",]
 nrow(lncRNA)
