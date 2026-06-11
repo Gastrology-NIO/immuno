@@ -103,7 +103,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
               genes_lFC[order(abs(genes_lFC$log2FoldChange), decreasing = TRUE), "Row.names"],
               max_genes
             )
-            enrich_BP@result$geneID<-paste(top20, collapse = "/")
+            enrich_BP@result$geneID[i]<-paste(top20, collapse = "/")
             }    
         
             for (i in  1:length(enrich_MF@result$geneID)){
@@ -113,7 +113,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
               genes_lFC[order(abs(genes_lFC$log2FoldChange), decreasing = TRUE), "Row.names"],
               max_genes
             )
-            	enrich_MF@result$geneID<-paste(top20, collapse = "/")
+            	enrich_MF@result$geneID[i]<-paste(top20, collapse = "/")
             }    
                     for (i in  1:length(enrich_CC@result$geneID)){
             	genes_list<-unlist(strsplit(enrich_CC@result$geneID[i], "/"))
@@ -122,16 +122,17 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
               genes_lFC[order(abs(genes_lFC$log2FoldChange), decreasing = TRUE), "Row.names"],
               max_genes
             )
-            	enrich_CC@result$geneID<-paste(top20, collapse = "/")
+            	enrich_CC@result$geneID[i]<-paste(top20, collapse = "/")
             }    
-                            for (i in  1:length(kegg@result$geneID)){
-            	genes_list<-unlist(strsplit(kegg@result$geneID[i], "/"))
-            	genes_lFC<-result_sign[result_sign$Row.names %in% genes_list,]
+            kegg_tmp<-setReadable(kegg, 'org.Hs.eg.db', 'ENTREZID')    
+        for (i in  1:length(kegg_tmp@result$geneID)){
+            	genes_list<-unlist(strsplit(kegg_tmp@result$geneID[[i]], "/"))
+            	genes_lFC<-result_sign[result_sign$symbol %in% genes_list,]
             	top20 <- head(
-              genes_lFC[order(abs(genes_lFC$log2FoldChange), decreasing = TRUE), "Row.names"],
+              genes_lFC[order(abs(genes_lFC$log2FoldChange), decreasing = TRUE), "symbol"],
               max_genes
             )
-            	kegg@result$geneID<-paste(top20, collapse = "/")
+            	kegg_tmp@result$geneID[[i]]<-paste(top20, collapse = "/")
             }    
     }
     
@@ -179,6 +180,12 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     if (nrow(enrich_BP)>1){
             enrich_tmp<-setReadable(enrich_BP, 'org.Hs.eg.db', 'ENSEMBL')
             cnet_BP<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=top10_BP)
+            cnet_BP<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=c("energy derivation by oxidation of organic compounds", 
+                                                                                       "chromosome segregation", 
+                                                                                       "macroautophagy", 
+                                                                                       "vesicle organization", 
+                                                                                       "cellular respiration"))
+
             ggsave(
                   paste0(folder,"cnet_", name, "_goEnrich.pdf"),
                 plot = cnet_BP,
@@ -189,6 +196,9 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
         enrich_tmp<-setReadable(enrich_MF, 'org.Hs.eg.db', 'ENSEMBL')
 
         cnet_MF<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=top10_MF)
+        cnet_MF<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=c("isomerase activity", 
+                                                                                       "ATP hydrolysis activity", 
+                                                                                       "protein serine threonine kinase acivity"))
         ggsave(
               paste0(folder,"cnet_", name, "_MF_goEnrich.pdf"),
             plot = cnet_MF,
@@ -198,6 +208,10 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     if (nrow(enrich_CC)>1){
         enrich_tmp<-setReadable(enrich_CC, 'org.Hs.eg.db', 'ENSEMBL')
     cnet_CC<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=top10_cc)
+            cnet_CC<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=c("GTP binding chromosomal region", 
+                                                                                       "cytoplasmic vesicle lumen", 
+                                                                                       "secretory granule lumen"))
+
     ggsave(
           paste0(folder,"cnet_", name, "_cc_goEnrich.pdf"),
         plot = cnet_CC,
@@ -215,7 +229,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     dev.off()
     
     
-    kegg_tmp<-setReadable(kegg, 'org.Hs.eg.db', 'ENTREZID')
+    #kegg_tmp<-setReadable(kegg, 'org.Hs.eg.db', 'ENTREZID')
     
     original_gene_list <- result_sign$log2FoldChange
     names(original_gene_list) <- result_sign$entrezid
