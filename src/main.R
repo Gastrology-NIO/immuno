@@ -73,17 +73,23 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     
     result_sign[c(result_sign$log2FoldChange<-1 | result_sign$log2FoldChange>1),] -> result_sign
     enrich_BP<-enrichGO(result_sign, "BP")
+    top10_BP <- head(enrich_BP@result[order(enrich_BP@result$pvalue), ], max_categories)
+    top10_BP <- top10_BP$Description
     enrich_BP_df<- as.data.frame(enrich_BP)
     output_file<-paste0(folder, "enrichmentGO_BP_padj_0_05_lfc_1_", name,".csv")
     write.csv2(enrich_BP_df, output_file)
 
     enrich_MF<-enrichGO(result_sign, "MF")
+    top10_MF <- head(enrich_MF@result[order(enrich_MF@result$pvalue), ], max_categories)
+    top10_MF <- top10_MF$Description
     enrich_MF_df<- as.data.frame(enrich_MF)
     output_file<-paste0(folder, "enrichmentGO_MF_padj_0_05_lfc_1_", name,".csv")
     write.csv2(enrich_MF_df, output_file)
 
     enrich_CC<-enrichGO(result_sign, "CC")
     enrich_CC_df<- as.data.frame(enrich_CC)
+    top10_cc <- head(enrich_CC@result[order(enrich_CC@result$pvalue), ], max_categories)
+    top10_cc <- top10_cc$Description
     output_file<-paste0(folder, "enrichmentGO_CC_padj_0_05_lfc_1_", name,".csv")
     write.csv2(enrich_CC_df, output_file)
     kegg<-runenrichKegg(result_sign, result_sign$gene_id, name)
@@ -172,7 +178,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     names(original_gene_list) <- result_sign$Row.names
     if (nrow(enrich_BP)>1){
             enrich_tmp<-setReadable(enrich_BP, 'org.Hs.eg.db', 'ENSEMBL')
-            cnet_BP<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=max_categories)
+            cnet_BP<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=top10_BP)
             ggsave(
                   paste0(folder,"cnet_", name, "_goEnrich.pdf"),
                 plot = cnet_BP,
@@ -182,7 +188,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     if (nrow(enrich_MF)>1){
         enrich_tmp<-setReadable(enrich_MF, 'org.Hs.eg.db', 'ENSEMBL')
 
-        cnet_MF<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=max_categories)
+        cnet_MF<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=top10_MF)
         ggsave(
               paste0(folder,"cnet_", name, "_MF_goEnrich.pdf"),
             plot = cnet_MF,
@@ -191,7 +197,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     
     if (nrow(enrich_CC)>1){
         enrich_tmp<-setReadable(enrich_CC, 'org.Hs.eg.db', 'ENSEMBL')
-    cnet_CC<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=max_categories)
+    cnet_CC<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=top10_cc)
     ggsave(
           paste0(folder,"cnet_", name, "_cc_goEnrich.pdf"),
         plot = cnet_CC,
