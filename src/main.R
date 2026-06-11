@@ -93,6 +93,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     output_file<-paste0(folder, "enrichmentGO_CC_padj_0_05_lfc_1_", name,".csv")
     write.csv2(enrich_CC_df, output_file)
     kegg<-runenrichKegg(result_sign, result_sign$gene_id, name)
+    kegg_tmp<-setReadable(kegg, 'org.Hs.eg.db', 'ENTREZID')    
 
     library(dplyr)
     if (max_genes>0){
@@ -124,7 +125,6 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
             )
             	enrich_CC@result$geneID[i]<-paste(top20, collapse = "/")
             }    
-            kegg_tmp<-setReadable(kegg, 'org.Hs.eg.db', 'ENTREZID')    
         for (i in  1:length(kegg_tmp@result$geneID)){
             	genes_list<-unlist(strsplit(kegg_tmp@result$geneID[[i]], "/"))
             	genes_lFC<-result_sign[result_sign$symbol %in% genes_list,]
