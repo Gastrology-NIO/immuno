@@ -55,7 +55,6 @@ p <- ggplot(pcaData,
         "text",
         x = Inf,
         y = Inf,
-        label = label_text,
         hjust = 1.1,
         vjust = 1.5,
         size = 5
