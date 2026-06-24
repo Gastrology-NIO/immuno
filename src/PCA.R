@@ -46,15 +46,14 @@ p <- ggplot(pcaData,
       color = NA
     ) +
 
-    geom_text_repel(
-        aes(label = patient_id),
-        size = 3
-    ) +
+
 
     annotate(
         "text",
         x = Inf,
         y = Inf,
+      
+      label = label_text,
         hjust = 1.1,
         vjust = 1.5,
         size = 5
