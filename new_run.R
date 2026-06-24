@@ -59,4 +59,16 @@ metadata_5_analyse<- metadata_5_analyse[!c(metadata_5_analyse$probe_name %in% c(
 
 run_analyse(folder, metadata_5_analyse, name, analyse_pairs=F, analyse_sex=T)
 
+# 1 pobranie (NtproBNP==1, 0)
+name<-"1_pobranie_NtproBNP_1_vs_0"
+folder<-paste0("./result/",name,"/")
 
+conditions <- list(type='Pobranie 1', 'wzrost.NtproBNP'=c(0,1))
+metadata_2_analyse <- cut_metadata(metadata, conditions)
+metadata_2_analyse$research<-metadata_2_analyse$'wzrost.NtproBNP'
+metadata_2_analyse$research[metadata_2_analyse$research=='0']<-"Control"
+metadata_2_analyse$research[metadata_2_analyse$research=='1']<-"Searched"
+metadata_2_analyse<- metadata_2_analyse[metadata_2_analyse$probe_name != "",]
+metadata_2_analyse<- metadata_2_analyse[!c(metadata_2_analyse$probe_name %in% c("63IM")),]
+
+run_analyse(folder, metadata_2_analyse, name, analyse_pairs=F, analyse_sex=T)
