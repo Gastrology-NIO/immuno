@@ -2,13 +2,21 @@
 library(vegan)
 
 plotPCA<-function(dds,metadata, save_path, model){
-
   vsd <- vst(dds, blind = FALSE)
-  mat <- assay(vsd)
-  dist_mat <- dist(t(mat))
-  adonis_res<-adonis2(
-    model,
-    data = as.data.frame(colData(vsd)),
+  mat <- counts(dds, normalized = TRUE)
+  
+  mat <- mat[rowMeans(mat) > 1, ]
+  
+  mat_t <- t(mat)
+  dist_bc <- vegdist(mat_t, method = "euclidean")
+  
+  meta <- as.data.frame(colData(dds))
+  
+  # 6. PERMANOVA
+  adonis_res <- adonis2(
+    dist_bc ~ research,
+    data = meta,
+    permutations = 999
   )
   pval <- adonis_res$`Pr(>F)`[1]
   
