@@ -54,10 +54,16 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     nrow(lncRNA)
     nrow(lncRNA[lncRNA$log2FoldChange< -1,])
     nrow(lncRNA[lncRNA$log2FoldChange>1,])
-    result_sign2 <- data.frame(lapply(result_sign, function(x) {
+    result_sign2 <- data.frame(lapply(result, function(x) {
       if (is.list(x)) sapply(x, paste, collapse = ",") else x
     }))
     output_file<-paste0(folder, "deseq_genes_info_", name,".csv")
+    write.table(result_sign2, output_file, sep = ";", row.names = FALSE)
+
+    result_sign2 <- data.frame(lapply(result_sign, function(x) {
+      if (is.list(x)) sapply(x, paste, collapse = ",") else x
+    }))
+    output_file<-paste0(folder, "deseq_all_genes_info_", name,".csv")
     write.table(result_sign2, output_file, sep = ";", row.names = FALSE)
 
     
