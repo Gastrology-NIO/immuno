@@ -3,7 +3,7 @@ library(vegan)
 
 plotPCA<-function(dds,metadata, save_path, model){
   vsd <- vst(dds, blind = FALSE)
-  mat <- counts(dds, normalized = TRUE)
+  mat <- counts(dds, normalized = F)
   
   mat <- mat[rowMeans(mat) > 1, ]
   
