@@ -2,7 +2,6 @@
 library(vegan)
 
 plotPCA<-function(dds,metadata, save_path, model){
-  vsd <- vst(dds, blind = FALSE)
   mat <- counts(dds, normalized = F)
   
   mat <- mat[rowMeans(mat) > 1, ]
@@ -28,9 +27,9 @@ plotPCA<-function(dds,metadata, save_path, model){
     signif(pval, 3)
 )
   
-
-  
-pca <- prcomp(t(mat), scale. = FALSE)
+vsd <- vst(dds, blind = FALSE)
+mat <- assay(vsd)
+pca <- prcomp(t(mat))
 pcaData <- data.frame(
     PC1 = pca$x[,1],
     PC2 = pca$x[,2],
