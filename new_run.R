@@ -1,74 +1,67 @@
 
 # 1 pobranie VS kontrola
-name<-"pobranie1_vs_kontrola"
+name<-"checkpoint1_vs_control"
 folder<-paste0("./result/",name,"/")
 
-conditions <- list(type=c('Pobranie 1', 'kontrola'))
+conditions <- list(type=c('checkpoint 1', 'kontrola'))
 metadata_0_analyse <- cut_metadata(metadata, conditions)
 metadata_0_analyse$research<-metadata_0_analyse$type
-metadata_0_analyse$research[metadata_0_analyse$type=='kontrola']<-"Control"
-metadata_0_analyse$research[metadata_0_analyse$type=='Pobranie 1']<-"Searched"
+metadata_0_analyse$research[metadata_0_analyse$type=='control']<-"Control"
+metadata_0_analyse$research[metadata_0_analyse$type=='checkpoint 1']<-"Searched"
 metadata_0_analyse<- metadata_0_analyse[metadata_0_analyse$probe_name != "",]
 run_analyse(folder, metadata_0_analyse, name, analyse_pairs=F, analyse_sex=T, max_genes=20, max_categories=5)
 run_analyse(folder, metadata_0_analyse, paste0(name, "_2"), analyse_pairs=F, analyse_sex=T)
 run_analyse(folder, metadata_0_analyse, paste0(name, "_3"), analyse_pairs=F, analyse_sex=T, max_categories=5)
 
-folder<-"./result/pobranie1_vs_kontrola/"
 
-# 1 pobranie (3 miesiące vs powyżej 2 lat)
+  # Checkpoint 1 (3 miesiące vs powyżej 2 lat)
 
-name<-"1pobranie_3miesiace_vs_powyżej_2_lata"
+name<-"checkpoint1_3months_vs_Over2Years"
 folder<-paste0("./result/",name,"/")
 
-conditions <- list(type='Pobranie 1', 'time.of.OS'=c('poni\xbfej 3 miesi\xeacy', '> 2 lata'))
+conditions <- list(type='checkpoint 1', 'time.of.OS'=c('under 3 months', 'over 2 years'))
 metadata_1_analyse <- cut_metadata(metadata, conditions)
 metadata_1_analyse$research<-metadata_1_analyse$'time.of.OS'
-metadata_1_analyse$research[metadata_1_analyse$research=='poni\xbfej 3 miesi\xeacy']<-"Control"
-metadata_1_analyse$research[metadata_1_analyse$research=='> 2 lata']<-"Searched"
+metadata_1_analyse$research[metadata_1_analyse$research=='under 2 months']<-"Control"
+metadata_1_analyse$research[metadata_1_analyse$research=='over 2 years']<-"Searched"
 
 run_analyse(folder, metadata_1_analyse, name, analyse_pairs=F, analyse_sex=T)
 
 
-# NtproBNP==1 (1 pobranie vs 2 pobranie)
-name<-"NtproBNP_1_1_pobranie_vs_2_pobranie"
+# NtproBNP==1 (checkpoint 1 vs 2 checkpoint 2)
+name<-"NtproBNP_1_checkpoint1_vs_checkpoint2"
 folder<-paste0("./result/",name,"/")
 
-conditions <- list(type=c('Pobranie 1', 'Pobranie 2'), 'wzrost.NtproBNP'=1)
+conditions <- list(type=c('checkpoint1', 'checkpoint2'), 'increase.NtproBNP'=1)
 metadata_4_analyse <- cut_metadata(metadata, conditions)
 metadata_4_analyse$research<-metadata_4_analyse$type
-metadata_4_analyse$research[metadata_4_analyse$research=='Pobranie 1']<-"Control"
-metadata_4_analyse$research[metadata_4_analyse$research=='Pobranie 2']<-"Searched"
+metadata_4_analyse$research[metadata_4_analyse$research=='checkpoint1']<-"Control"
+metadata_4_analyse$research[metadata_4_analyse$research=='checkpoint2']<-"Searched"
 metadata_4_analyse<- metadata_4_analyse[metadata_4_analyse$probe_name != "",]
-metadata_4_analyse<- metadata_4_analyse[!c(metadata_4_analyse$probe_name %in% c("63IM")),]
-
 run_analyse(folder, metadata_4_analyse, name, analyse_pairs=T, analyse_sex=F)
 
 
 
-# 2 pobranie (NtproBNP==1, 0)
-name<-"2_pobranie_NtproBNP_1_vs_0"
+# 2 checkpoint 2 (NtproBNP==1, 0)
+name<-"checkpoint2_NtproBNP_1_vs_0"
 folder<-paste0("./result/",name,"/")
 
-conditions <- list(type='Pobranie 2', 'wzrost.NtproBNP'=c(0,1))
+conditions <- list(type='Pobranie 2', 'increase.NtproBNP'=c(0,1))
 metadata_5_analyse <- cut_metadata(metadata, conditions)
-metadata_5_analyse$research<-metadata_5_analyse$'wzrost.NtproBNP'
+metadata_5_analyse$research<-metadata_5_analyse$'increase.NtproBNP'
 metadata_5_analyse$research[metadata_5_analyse$research=='0']<-"Control"
 metadata_5_analyse$research[metadata_5_analyse$research=='1']<-"Searched"
 metadata_5_analyse<- metadata_5_analyse[metadata_5_analyse$probe_name != "",]
-metadata_5_analyse<- metadata_5_analyse[!c(metadata_5_analyse$probe_name %in% c("63IM")),]
-
 run_analyse(folder, metadata_5_analyse, name, analyse_pairs=F, analyse_sex=T)
 
 # 1 pobranie (NtproBNP==1, 0)
-name<-"1_pobranie_NtproBNP_1_vs_0"
+name<-"checkpoint1_NtproBNP_1_vs_0"
 folder<-paste0("./result/",name,"/")
 
-conditions <- list(type='Pobranie 1', 'wzrost.NtproBNP'=c(0,1))
+conditions <- list(type='Pobranie 1', 'increase.NtproBNP'=c(0,1))
 metadata_2_analyse <- cut_metadata(metadata, conditions)
-metadata_2_analyse$research<-metadata_2_analyse$'wzrost.NtproBNP'
+metadata_2_analyse$research<-metadata_2_analyse$'increase.NtproBNP'
 metadata_2_analyse$research[metadata_2_analyse$research=='0']<-"Control"
 metadata_2_analyse$research[metadata_2_analyse$research=='1']<-"Searched"
 metadata_2_analyse<- metadata_2_analyse[metadata_2_analyse$probe_name != "",]
-metadata_2_analyse<- metadata_2_analyse[!c(metadata_2_analyse$probe_name %in% c("63IM")),]
-
 run_analyse(folder, metadata_2_analyse, name, analyse_pairs=F, analyse_sex=T)
