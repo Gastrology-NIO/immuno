@@ -29,7 +29,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
         metadata <- metadata %>%
           group_by(patient_id) %>%
           filter(n_distinct(type) == 2)
-        x<-load_DGE(metadata,  "./htseq2/") 
+        x<-load_DGE(metadata,  "./htseq/") 
         deseq_res<-run_deseq2_paired(x, metadata)
         run_deseq<-deseq_res$res
         dds<-deseq_res$dds
