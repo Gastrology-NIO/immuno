@@ -1,5 +1,5 @@
 
-# 1 pobranie VS kontrola
+# checkpoint1 VS control
 name<-"checkpoint1_vs_control"
 folder<-paste0("./result/",name,"/")
 
@@ -14,11 +14,9 @@ run_analyse(folder, metadata_0_analyse, paste0(name, "_2"), analyse_pairs=F, ana
 run_analyse(folder, metadata_0_analyse, paste0(name, "_3"), analyse_pairs=F, analyse_sex=T, max_categories=5)
 
 
-  # Checkpoint 1 (3 miesiące vs powyżej 2 lat)
-
+# Checkpoint 1 (3 miesiące vs powyżej 2 lat)
 name<-"checkpoint1_3months_vs_Over2Years"
 folder<-paste0("./result/",name,"/")
-
 conditions <- list(type='checkpoint 1', 'time.of.OS'=c('under 3 months', 'over 2 years'))
 metadata_1_analyse <- cut_metadata(metadata, conditions)
 metadata_1_analyse$research<-metadata_1_analyse$'time.of.OS'
@@ -31,7 +29,6 @@ run_analyse(folder, metadata_1_analyse, name, analyse_pairs=F, analyse_sex=T)
 # NtproBNP==1 (checkpoint 1 vs 2 checkpoint 2)
 name<-"NtproBNP_1_checkpoint1_vs_checkpoint2"
 folder<-paste0("./result/",name,"/")
-
 conditions <- list(type=c('checkpoint1', 'checkpoint2'), 'increase.NtproBNP'=1)
 metadata_4_analyse <- cut_metadata(metadata, conditions)
 metadata_4_analyse$research<-metadata_4_analyse$type
@@ -45,8 +42,7 @@ run_analyse(folder, metadata_4_analyse, name, analyse_pairs=T, analyse_sex=F)
 # 2 checkpoint 2 (NtproBNP==1, 0)
 name<-"checkpoint2_NtproBNP_1_vs_0"
 folder<-paste0("./result/",name,"/")
-
-conditions <- list(type='Pobranie 2', 'increase.NtproBNP'=c(0,1))
+conditions <- list(type='checkpoint2', 'increase.NtproBNP'=c(0,1))
 metadata_5_analyse <- cut_metadata(metadata, conditions)
 metadata_5_analyse$research<-metadata_5_analyse$'increase.NtproBNP'
 metadata_5_analyse$research[metadata_5_analyse$research=='0']<-"Control"
@@ -57,8 +53,7 @@ run_analyse(folder, metadata_5_analyse, name, analyse_pairs=F, analyse_sex=T)
 # 1 pobranie (NtproBNP==1, 0)
 name<-"checkpoint1_NtproBNP_1_vs_0"
 folder<-paste0("./result/",name,"/")
-
-conditions <- list(type='Pobranie 1', 'increase.NtproBNP'=c(0,1))
+conditions <- list(type='checkpoint1', 'increase.NtproBNP'=c(0,1))
 metadata_2_analyse <- cut_metadata(metadata, conditions)
 metadata_2_analyse$research<-metadata_2_analyse$'increase.NtproBNP'
 metadata_2_analyse$research[metadata_2_analyse$research=='0']<-"Control"
