@@ -48,7 +48,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     tmp<-tmp[c(tmp$log2FoldChange < -1 | tmp$log2FoldChange >1),]
     nrow(tmp)
 
-    result<-add_genes_info(run_deseq, ah)
+    result<-add_genes_info(run_deseq)
     result[result$padj<0.05,] -> result_sign
     lncRNA<-result_sign[result_sign$gene_biotype=="lncRNA",]
     nrow(lncRNA)
