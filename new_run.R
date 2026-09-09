@@ -1,4 +1,6 @@
 
+metadata<-load_data_meta("./data/metadata_jag.csv")
+
 # checkpoint1 VS control
 name<-"checkpoint1_vs_control"
 folder<-paste0("./result/",name,"/")
@@ -14,6 +16,7 @@ run_analyse(folder, metadata_0_analyse, paste0(name, "_2"), analyse_pairs=F, ana
 run_analyse(folder, metadata_0_analyse, paste0(name, "_3"), analyse_pairs=F, analyse_sex=T, max_categories=5)
 
 
+# additional info: difference.days
 # Checkpoint 1 (under 3 months vs over 2 years)
 name<-"checkpoint1_3months_vs_Over2Years"
 folder<-paste0("./result/",name,"/")
