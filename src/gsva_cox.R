@@ -40,8 +40,10 @@ gene_sets <- lapply(
       unique()
   }
 )
+vsd <- vst(dds, blind = TRUE)
+  expr <- assay(vsd)
 
-  
+
   param <- gsvaParam(
       exprData = expr,
       geneSets = gene_sets
@@ -49,41 +51,129 @@ gene_sets <- lapply(
   
   gsva_res <- gsva(param)
   
-  dim(gsva_res)
-  
-  # connect from this point df with metadata
-  score <- gsva_res["platelet", ]
-  
-  score_df <- data.frame(
-      patient_id = names(platelet_score),
-      score = as.numeric(score)
-  )
-  
-  clinical <- merge(
-      metadata,
-      score_df,
-      by.x = "patient_id",
-      by.y = "patient_id"
-  )
-  
-  
-  model <- glm(
-      wzrost.NtproBNP ~ score + sex + dni,
-      data = clinical,
-      family = binomial
-  )
-  
-  summary(model)
-  
-  
-  #death - zmarł, nie zmarł 1,0
-  cox <- coxph(
-      Surv(dni, death) ~
-          score +
-          sex,
-      data = clinical
-  )
-  
-  summary(cox)
+  metadata$patient_id <- as.character(metadata$probe_name)
+
+metadata <- metadata[
+    match(colnames(gsva_res), metadata$patient_id),
+]
+
+rownames(metadata) <- NULL
+metadata$wzrost.NtproBNP[
+    metadata$wzrost.NtproBNP == ""
+] <- NA
+logistic_results <- data.frame()
+
+for (pathway in rownames(gsva_res)) {
+    
+    clinical <- metadata
+    
+    clinical$score <- as.numeric(
+        gsva_res[pathway, clinical$patient_id]
+    )
+    clinical$wzrost.NtproBNP <- as.numeric(clinical$wzrost.NtproBNP)
+
+clinical$s <- factor(clinical$s)
+
+clinical$score <- as.numeric(clinical$score)
+
+clinical$dni <- as.numeric(clinical$dni)
+    
+    model <- glm(
+        wzrost.NtproBNP ~ score + s + dni,
+        data = clinical,
+        family = binomial
+    )
+    
+    coef_model <- summary(model)$coefficients
+    
+    logistic_results <- rbind(
+        logistic_results,
+        data.frame(
+            pathway = pathway,
+            beta = coef_model["score", "Estimate"],
+            SE = coef_model["score", "Std. Error"],
+            pvalue = coef_model["score", "Pr(>|z|)"],
+            OR = exp(coef_model["score", "Estimate"]),
+            CI_low = exp(
+                coef_model["score", "Estimate"] -
+                1.96 * coef_model["score", "Std. Error"]
+            ),
+            CI_high = exp(
+                coef_model["score", "Estimate"] +
+                1.96 * coef_model["score", "Std. Error"]
+            )
+        )
+    )
+}
+    library(survival)
+
+cox_results <- data.frame()
+
+for (pathway in rownames(gsva_res)) {
+    
+    clinical <- metadata
+    
+    clinical$score <- as.numeric(
+        gsva_res[pathway, clinical$patient_id]
+    )
+    
+    model <- coxph(
+        Surv(dni, death) ~ score + s,
+        data = clinical
+    )
+    
+    coef_model <- summary(model)$coefficients
+    
+    cox_results <- rbind(
+        cox_results,
+        data.frame(
+            pathway = pathway,
+            beta = coef_model["score", "coef"],
+            HR = coef_model["score", "exp(coef)"],
+            SE = coef_model["score", "se(coef)"],
+            pvalue = coef_model["score", "Pr(>|z|)"]
+        )
+    )
+}
+
+cox_results <- data.frame()
+
+for (pathway in rownames(gsva_res)) {
+    
+    clinical <- metadata
+    
+    clinical$score <- as.numeric(
+        gsva_res[pathway, clinical$patient_id]
+    )
+    
+    model <- coxph(
+        Surv(dni, zgon_bool) ~ score + s,
+        data = clinical
+    )
+    
+    s <- summary(model)
+    
+    cox_results <- rbind(
+        cox_results,
+        data.frame(
+            pathway = pathway,
+            HR = s$coefficients["score", "exp(coef)"],
+            CI_low = s$conf.int["score", "lower .95"],
+            CI_high = s$conf.int["score", "upper .95"],
+            pvalue = s$coefficients["score", "Pr(>|z|)"]
+        )
+    )
+}
+
+logistic_results$FDR <- p.adjust(
+    logistic_results$pvalue,
+    method = "BH"
+)
+
+cox_results$FDR <- p.adjust(
+    cox_results$pvalue,
+    method = "BH"
+)
+    
 
   }
