@@ -23,7 +23,7 @@ folder<-paste0("./result/",name,"/")
 conditions <- list(type='checkpoint 1', 'time.of.OS'=c('under 3 months', 'over 2 years'))
 metadata_1_analyse <- cut_metadata(metadata, conditions)
 metadata_1_analyse$research<-metadata_1_analyse$'time.of.OS'
-metadata_1_analyse$research[metadata_1_analyse$research=='under 2 months']<-"Control"
+metadata_1_analyse$research[metadata_1_analyse$research=='under 3 months']<-"Control"
 metadata_1_analyse$research[metadata_1_analyse$research=='over 2 years']<-"Searched"
 
 run_analyse(folder, metadata_1_analyse, name, analyse_pairs=F, analyse_sex=T)
