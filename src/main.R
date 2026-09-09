@@ -1,3 +1,6 @@
+library(edgeR)
+DESeq2
+
 
 run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, max_genes=0, max_categories=5) {
     # limma
