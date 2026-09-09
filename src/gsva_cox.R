@@ -8,20 +8,39 @@ library(GSVA)
 library(survival)
 
 
-run_analyse <- function(x, dds, metadata) {
+run_analyse <- function(x, dds, metadata, kegg) {
 
-  rownames(metadata) <- metadata$patient_id
-  metadata <- metadata[colnames(x), , drop = FALSE]
-  metadata$s <- factor(metadata$s)
-  metadata$research <- factor(metadata$research)
-  vsd <- vst(dds, blind = TRUE)
-  expr <- assay(vsd)
-  
-  # gene_sets <- list(
-  #     platelet = platelet_genes,
-  #     coagulation = coagulation_genes
-  # )
-  genes_set<-list()
+    kegg_sig <- kegg[kegg$p.adjust < 0.05, ]
+
+
+   gene_sets_entrez <- lapply(
+  kegg_sig$geneID,
+  function(x) unique(unlist(strsplit(x, "/")))
+)
+
+names(gene_sets_entrez) <- kegg_sig$Description
+
+
+all_entrez <- unique(unlist(gene_sets_entrez))
+
+conversion <- bitr(
+  all_entrez,
+  fromType = "ENTREZID",
+  toType = "ENSEMBL",
+  OrgDb = org.Hs.eg.db
+)
+
+gene_sets <- lapply(
+  gene_sets_entrez,
+  function(genes) {
+    conversion$ENSEMBL[
+      match(genes, conversion$ENTREZID)
+    ] |> 
+      na.omit() |> 
+      unique()
+  }
+)
+
   
   param <- gsvaParam(
       exprData = expr,
