@@ -7,6 +7,8 @@ library(DESeq2)
 library(GSVA)
 library(survival)
 
+library(httr)
+library(dplyr)
 
 run_analyse <- function(x, dds, metadata, kegg) {
 
@@ -18,28 +20,71 @@ run_analyse <- function(x, dds, metadata, kegg) {
   function(x) unique(unlist(strsplit(x, "/")))
 )
 
-names(gene_sets_entrez) <- kegg_sig$Description
+# names(gene_sets_entrez) <- kegg_sig$Description
 
 
-all_entrez <- unique(unlist(gene_sets_entrez))
+# all_entrez <- unique(unlist(gene_sets_entrez))
 
-conversion <- bitr(
-  all_entrez,
-  fromType = "ENTREZID",
-  toType = "ENSEMBL",
-  OrgDb = org.Hs.eg.db
+# conversion <- bitr(
+#   all_entrez,
+#   fromType = "ENTREZID",
+#   toType = "ENSEMBL",
+#   OrgDb = org.Hs.eg.db
+# )
+
+# gene_sets <- lapply(
+#   gene_sets_entrez,
+#   function(genes) {
+#     conversion$ENSEMBL[
+#       match(genes, conversion$ENTREZID)
+#     ] |> 
+#       na.omit() |> 
+#       unique()
+#   }
+# )
+
+
+# KEGG pathway
+pathway_id <- "hsa04611"
+
+# Pobranie genów przypisanych do pathway
+url <- paste0(
+    "https://rest.kegg.jp/link/hsa/",
+    pathway_id
+)
+    
+
+kegg <- read.delim(
+    url,
+    header = FALSE,
+    sep = "\t",
+    stringsAsFactors = FALSE
 )
 
-gene_sets <- lapply(
-  gene_sets_entrez,
-  function(genes) {
-    conversion$ENSEMBL[
-      match(genes, conversion$ENTREZID)
-    ] |> 
-      na.omit() |> 
-      unique()
-  }
+colnames(kegg) <- c("pathway", "gene")
+
+# usunięcie prefiksu hsa:
+platelet_genes <- sub("^hsa:", "", kegg$gene)
+
+platelet_genes
+
+platelet_symbols <- mapIds(
+    org.Hs.eg.db,
+    keys = platelet_genes,
+    keytype = "ENTREZID",
+    column = "ENSEMBL",
+    multiVals = "first"
 )
+
+platelet_symbols <- na.omit(platelet_symbols)
+
+platelet_symbols
+gene_sets <- list(
+    Platelet_activation = unname(platelet_symbols)
+)
+    ##########
+
+    
 vsd <- vst(dds, blind = TRUE)
   expr <- assay(vsd)
 
