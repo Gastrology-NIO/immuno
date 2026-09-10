@@ -28,6 +28,21 @@ metadata_1_analyse$research[metadata_1_analyse$research=='over 2 years']<-"Searc
 
 run_analyse(folder, metadata_1_analyse, name, analyse_pairs=F, analyse_sex=T)
 
+name<-"checkpoint1_3months_vs_Over2Years"
+folder<-paste0("./result/",name,"/")
+conditions <- list(type='checkpoint 1')
+metadata_checkpoint1 <- cut_metadata(metadata, conditions)
+x<-load_DGE(metadata_checkpoint1,  "./htseq/") 
+dge <- calcNormFactors(x)
+
+# log-CPM
+expr <- cpm(
+    dge,
+    log = TRUE,
+    prior.count = 1
+)
+rownames(expr) <- sub("\\..*$", "", rownames(expr))
+
 
 # NtproBNP==1 (checkpoint 1 vs 2 checkpoint 2)
 name<-"NtproBNP_1_checkpoint1_vs_checkpoint2"
