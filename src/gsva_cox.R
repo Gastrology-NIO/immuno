@@ -9,7 +9,7 @@ library(survival)
 
 library(httr)
 library(dplyr)
-
+#As metadata, we should use all metadata, not only edge cases
 run_analyse <- function(x, dds, metadata, kegg) {
 
     kegg_sig <- kegg[kegg$p.adjust < 0.05, ]
