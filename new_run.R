@@ -42,7 +42,7 @@ expr <- cpm(
     prior.count = 1
 )
 rownames(expr) <- sub("\\..*$", "", rownames(expr))
-
+colnames(expr) <- basename(colnames(expr))
 
 # NtproBNP==1 (checkpoint 1 vs 2 checkpoint 2)
 name<-"NtproBNP_1_checkpoint1_vs_checkpoint2"
