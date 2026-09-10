@@ -25,17 +25,17 @@ run_analyse <- function(x, dds, metadata, kegg) {
             pathway_id
         )
         
-        kegg <- read.delim(
+        kegg_path <- read.delim(
             url,
             header = FALSE,
             sep = "\t",
             stringsAsFactors = FALSE
         )
         
-        colnames(kegg) <- c("pathway", "gene")
+        colnames(kegg_path) <- c("pathway", "gene")
         
         # usunięcie prefiksu hsa:
-        entrez_genes <- sub("^hsa:", "", kegg$gene)
+        entrez_genes <- sub("^hsa:", "", kegg_path$gene)
         
         # Entrez -> Ensembl
         ensembl_genes <- mapIds(
@@ -92,7 +92,7 @@ for (pathway in rownames(gsva_res)) {
     
     # Cox model
     model <- coxph(
-        Surv(dni, zgon_bool) ~ score + s,
+        Surv(dni, zgon_bool) ~ score +s,
         data = clinical
     )
     
