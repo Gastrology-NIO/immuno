@@ -15,205 +15,109 @@ run_analyse <- function(x, dds, metadata, kegg) {
     kegg_sig <- kegg[kegg$p.adjust < 0.05, ]
 
 
-   gene_sets_entrez <- lapply(
-  kegg_sig$geneID,
-  function(x) unique(unlist(strsplit(x, "/")))
+    for (pathway_id in rownames(kegg_sig)) {
+        
+        print(pathway_id)
+        
+        # pobranie genów przypisanych do pathway
+        url <- paste0(
+            "https://rest.kegg.jp/link/hsa/",
+            pathway_id
+        )
+        
+        kegg <- read.delim(
+            url,
+            header = FALSE,
+            sep = "\t",
+            stringsAsFactors = FALSE
+        )
+        
+        colnames(kegg) <- c("pathway", "gene")
+        
+        # usunięcie prefiksu hsa:
+        entrez_genes <- sub("^hsa:", "", kegg$gene)
+        
+        # Entrez -> Ensembl
+        ensembl_genes <- mapIds(
+            org.Hs.eg.db,
+            keys = entrez_genes,
+            keytype = "ENTREZID",
+            column = "ENSEMBL",
+            multiVals = "first"
+        )
+        
+        ensembl_genes <- unique(na.omit(ensembl_genes))
+        
+        # zostawiamy tylko geny obecne w macierzy ekspresji
+        ensembl_genes <- intersect(
+            ensembl_genes,
+            rownames(expr)
+        )
+        
+        # zapisujemy gene set
+        gene_sets[[pathway_id]] <- ensembl_genes
+    }
+
+gene_set_sizes <- sapply(gene_sets, length)
+
+param <- gsvaParam(
+    exprData = expr,
+    geneSets = gene_sets
 )
 
-# names(gene_sets_entrez) <- kegg_sig$Description
-
-
-# all_entrez <- unique(unlist(gene_sets_entrez))
-
-# conversion <- bitr(
-#   all_entrez,
-#   fromType = "ENTREZID",
-#   toType = "ENSEMBL",
-#   OrgDb = org.Hs.eg.db
-# )
-
-# gene_sets <- lapply(
-#   gene_sets_entrez,
-#   function(genes) {
-#     conversion$ENSEMBL[
-#       match(genes, conversion$ENTREZID)
-#     ] |> 
-#       na.omit() |> 
-#       unique()
-#   }
-# )
-
-
-# KEGG pathway
-pathway_id <- "hsa04611"
-
-# Pobranie genów przypisanych do pathway
-url <- paste0(
-    "https://rest.kegg.jp/link/hsa/",
-    pathway_id
-)
-    
-
-kegg <- read.delim(
-    url,
-    header = FALSE,
-    sep = "\t",
-    stringsAsFactors = FALSE
-)
-
-colnames(kegg) <- c("pathway", "gene")
-
-# usunięcie prefiksu hsa:
-platelet_genes <- sub("^hsa:", "", kegg$gene)
-
-platelet_genes
-
-platelet_symbols <- mapIds(
-    org.Hs.eg.db,
-    keys = platelet_genes,
-    keytype = "ENTREZID",
-    column = "ENSEMBL",
-    multiVals = "first"
-)
-
-platelet_symbols <- na.omit(platelet_symbols)
-
-platelet_symbols
-gene_sets <- list(
-    Platelet_activation = unname(platelet_symbols)
-)
-    ##########
+gsva_res <- gsva(param)
 
     
-vsd <- vst(dds, blind = TRUE)
-  expr <- assay(vsd)
-
-
-  param <- gsvaParam(
-      exprData = expr,
-      geneSets = gene_sets
-  )
-  
-  gsva_res <- gsva(param)
-  
-  metadata$patient_id <- as.character(metadata$probe_name)
-
-metadata <- metadata[
-    match(colnames(gsva_res), metadata$patient_id),
-]
-
 rownames(metadata) <- NULL
 metadata$wzrost.NtproBNP[
     metadata$wzrost.NtproBNP == ""
 ] <- NA
 logistic_results <- data.frame()
 
-for (pathway in rownames(gsva_res)) {
-    
-    clinical <- metadata
-    
-    clinical$score <- as.numeric(
-        gsva_res[pathway, clinical$patient_id]
-    )
-    clinical$wzrost.NtproBNP <- as.numeric(clinical$wzrost.NtproBNP)
-
-clinical$s <- factor(clinical$s)
-
-clinical$score <- as.numeric(clinical$score)
-
-clinical$dni <- as.numeric(clinical$dni)
-    
-    model <- glm(
-        wzrost.NtproBNP ~ score + s + dni,
-        data = clinical,
-        family = binomial
-    )
-    
-    coef_model <- summary(model)$coefficients
-    
-    logistic_results <- rbind(
-        logistic_results,
-        data.frame(
-            pathway = pathway,
-            beta = coef_model["score", "Estimate"],
-            SE = coef_model["score", "Std. Error"],
-            pvalue = coef_model["score", "Pr(>|z|)"],
-            OR = exp(coef_model["score", "Estimate"]),
-            CI_low = exp(
-                coef_model["score", "Estimate"] -
-                1.96 * coef_model["score", "Std. Error"]
-            ),
-            CI_high = exp(
-                coef_model["score", "Estimate"] +
-                1.96 * coef_model["score", "Std. Error"]
-            )
-        )
-    )
-}
-    library(survival)
-
 cox_results <- data.frame()
 
 for (pathway in rownames(gsva_res)) {
     
     clinical <- metadata
     
+    # GSVA score
     clinical$score <- as.numeric(
         gsva_res[pathway, clinical$patient_id]
     )
     
-    model <- coxph(
-        Surv(dni, death) ~ score + s,
-        data = clinical
-    )
-    
-    coef_model <- summary(model)$coefficients
-    
-    cox_results <- rbind(
-        cox_results,
-        data.frame(
-            pathway = pathway,
-            beta = coef_model["score", "coef"],
-            HR = coef_model["score", "exp(coef)"],
-            SE = coef_model["score", "se(coef)"],
-            pvalue = coef_model["score", "Pr(>|z|)"]
-        )
-    )
-}
-
-cox_results <- data.frame()
-
-for (pathway in rownames(gsva_res)) {
-    
-    clinical <- metadata
-    
+    # standaryzacja do 1 SD
     clinical$score <- as.numeric(
-        gsva_res[pathway, clinical$patient_id]
+        scale(clinical$score)
     )
     
+    # Cox model
     model <- coxph(
         Surv(dni, zgon_bool) ~ score + s,
         data = clinical
     )
     
-    s <- summary(model)
+    model_summary <- summary(model)
     
     cox_results <- rbind(
         cox_results,
         data.frame(
             pathway = pathway,
-            HR = s$coefficients["score", "exp(coef)"],
-            CI_low = s$conf.int["score", "lower .95"],
-            CI_high = s$conf.int["score", "upper .95"],
-            pvalue = s$coefficients["score", "Pr(>|z|)"]
+            HR = model_summary$coefficients[
+                "score", "exp(coef)"
+            ],
+            CI_low = model_summary$conf.int[
+                "score", "lower .95"
+            ],
+            CI_high = model_summary$conf.int[
+                "score", "upper .95"
+            ],
+            pvalue = model_summary$coefficients[
+                "score", "Pr(>|z|)"
+            ]
         )
     )
 }
 
-logistic_results$FDR <- p.adjust(
-    logistic_results$pvalue,
-    method = "BH"
-)
 
 cox_results$FDR <- p.adjust(
     cox_results$pvalue,
