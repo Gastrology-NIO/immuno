@@ -81,7 +81,8 @@ for (pathway in rownames(gsva_res)) {
     clinical <- metadata
     
     # GSVA score
-    clinical$score <- as.numeric(
+
+        clinical$score <- as.numeric(
         gsva_res[pathway, clinical$probe_name]
     )
     
@@ -92,7 +93,7 @@ for (pathway in rownames(gsva_res)) {
     
     # Cox model
     model <- coxph(
-        Surv(dni, zgon_bool) ~ score +s,
+        Surv(dni, zgon_bool) ~ score +s +wzrost.NtproBNP,
         data = clinical
     )
     
