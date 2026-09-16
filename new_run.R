@@ -54,6 +54,7 @@ metadata_4_analyse$research<-metadata_4_analyse$type
 metadata_4_analyse$research[metadata_4_analyse$research=='checkpoint1']<-"Control"
 metadata_4_analyse$research[metadata_4_analyse$research=='checkpoint2']<-"Searched"
 metadata_4_analyse<- metadata_4_analyse[metadata_4_analyse$probe_name != "",]
+metadata_4_analyse<-metadata_4_analyse[!c(metadata_4_analyse$probe_name %in% c("63IM")),]
 run_analyse(folder, metadata_4_analyse, name, analyse_pairs=T, analyse_sex=F)
 deconvolution_difference(name, metadata_4_analyse)
 
@@ -69,6 +70,8 @@ metadata_5_analyse$research[metadata_5_analyse$research=='0']<-"Control"
 metadata_5_analyse$research[metadata_5_analyse$research=='1']<-"Searched"
 metadata_5_analyse<- metadata_5_analyse[metadata_5_analyse$probe_name != "",]
 run_analyse(folder, metadata_5_analyse, name, analyse_pairs=F, analyse_sex=T)
+metadata_5_analyse<-metadata_5_analyse[!c(metadata_5_analyse$probe_name %in% c("63IM")),]
+
 deconvolution_difference(name, metadata_5_analyse)
 
 
