@@ -53,6 +53,7 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
 
     result<-add_genes_info(run_deseq)
     result[result$padj<0.05,] -> result_sign
+    result_sign <- result_sign[result_sign$mitochondrial == FALSE, ]
     lncRNA<-result_sign[result_sign$gene_biotype=="lncRNA",]
     nrow(lncRNA)
     nrow(lncRNA[lncRNA$log2FoldChange< -1,])
