@@ -64,8 +64,13 @@ deconvolution_difference<-function(name, metadata){
             tpm_symbol,
             method = "quantiseq"
         )
-        
-
+    
+        res_quantiseq_t <- res_quantiseq |>
+              tibble::column_to_rownames("cell_type") |>
+              t() |>
+              as.data.frame()
+    
+        write.csv(res_quantiseq_t, paste0(name,"_res_quantiseq_t.csv"), row.names = FALSE)
         
         # metadata tylko dla próbek, które są w Quantiseq
         meta <- metadata %>%
