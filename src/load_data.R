@@ -41,14 +41,21 @@ cut_metadata<-function(metadata, conditions){
 }
 library(AnnotationHub)
 library(ensembldb)
-
-add_genes_info<-function(data, ah=ah){
-  gene_symbols<-rownames(data)
- # ah <- AnnotationHub()
+add_genes_info <- function(data) {
+  
+  gene_symbols <- rownames(data)
+  
+  ah <- AnnotationHub::AnnotationHub()
   query(ah, c("Homo sapiens", "EnsDb"))
+  
   edb <- ah[["AH119325"]]
+  
   genes <- genes(edb, filter = GeneIdFilter(gene_symbols))
-  genes_info<-as.data.frame(genes)
-  data<-merge(genes_info, data, by=0)
+  genes_info <- as.data.frame(genes)
+  
+  #genes_info$mitochondrial <- as.character(genes_info$seqnames) %in% c("MT", "M", "chrM")
+  
+  data <- merge(genes_info, data, by = 0)
+  
   return(data)
 }
