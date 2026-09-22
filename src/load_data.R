@@ -53,7 +53,7 @@ add_genes_info <- function(data) {
   genes <- genes(edb, filter = GeneIdFilter(gene_symbols))
   genes_info <- as.data.frame(genes)
   
-  genes_info$mitochondrial <- as.character(genes_info$seqnames) %in% c("MT", "M", "chrM")
+  #genes_info$mitochondrial <- as.character(genes_info$seqnames) %in% c("MT", "M", "chrM")
   
   data <- merge(genes_info, data, by = 0)
   
