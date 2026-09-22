@@ -190,11 +190,11 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     if (nrow(enrich_BP)>1){
             enrich_tmp<-setReadable(enrich_BP, 'org.Hs.eg.db', 'ENSEMBL')
             cnet_BP<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=top10_BP)
-            cnet_BP<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=c("energy derivation by oxidation of organic compounds", 
-                                                                                       "chromosome segregation", 
-                                                                                       "macroautophagy", 
-                                                                                       "vesicle organization", 
-                                                                                       "cellular respiration"))
+            #cnet_BP<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=c("energy derivation by oxidation of organic compounds", 
+            #                                                                           "chromosome segregation", 
+            #                                                                           "macroautophagy", 
+            #                                                                           "vesicle organization", 
+            #                                                                           "cellular respiration"))
 
             ggsave(
                   paste0(folder,"cnet_", name, "_goEnrich.pdf"),
@@ -206,9 +206,9 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
         enrich_tmp<-setReadable(enrich_MF, 'org.Hs.eg.db', 'ENSEMBL')
 
         cnet_MF<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=top10_MF)
-        cnet_MF<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=c("isomerase activity", 
-                                                                                       "ATP hydrolysis activity", 
-                                                                                       "protein serine threonine kinase acivity"))
+        #cnet_MF<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=c("isomerase activity", 
+        #                                                                               "ATP hydrolysis activity", 
+        #                                                                               "protein serine threonine kinase acivity"))
         ggsave(
               paste0(folder,"cnet_", name, "_MF_goEnrich.pdf"),
             plot = cnet_MF,
@@ -218,9 +218,9 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     if (nrow(enrich_CC)>1){
         enrich_tmp<-setReadable(enrich_CC, 'org.Hs.eg.db', 'ENSEMBL')
     cnet_CC<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=top10_cc)
-            cnet_CC<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=c("GTP binding chromosomal region", 
-                                                                                       "cytoplasmic vesicle lumen", 
-                                                                                       "secretory granule lumen"))
+            #cnet_CC<-cnetplot(enrich_tmp, foldChange=original_gene_list, showCategory=c("GTP binding chromosomal region", 
+            #                                                                           "cytoplasmic vesicle lumen", 
+            #                                                                           "secretory granule lumen"))
 
     ggsave(
           paste0(folder,"cnet_", name, "_cc_goEnrich.pdf"),
@@ -244,9 +244,15 @@ run_analyse <- function(folder, metadata, name, analyse_pairs=T, analyse_sex=T, 
     original_gene_list <- result_sign$log2FoldChange
     names(original_gene_list) <- result_sign$entrezid
     cnet_kegg<-cnetplot(kegg_tmp, foldChange=original_gene_list, showCategory=5)
+    #c("Chemical carcinogenesis - reactive oxygen species", 
+    #                                                                            "Oxidative phosphorylation", 
+    #                                                                            "Diabetic cardiomyopathy", 
+    #                                                                            "Neutrophil extracellular trap formation", 
+    #                                                                            "Cell cycle")
     ggsave(
-          paste0(folder,"cnet_", name, "_KEGGEnrich.pdf"),
-        plot = cnet_kegg
+          paste0(folder,"cnet_", name, "_KEGGEnrich.svg"),
+        plot = cnet_kegg, 
+        width = 18, height = 18,
       )
     
       plots <- list()
