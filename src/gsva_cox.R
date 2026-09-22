@@ -90,7 +90,7 @@ for (pathway in rownames(gsva_res)) {
     clinical$score <- as.numeric(
         scale(clinical$score)
     )
-    df$zmiana.NTproBNP_10 <- as.numeric(df$zmiana.NTproBNP) / 10
+    clinical$zmiana.NTproBNP_10 <- as.numeric(clinical$zmiana.NTproBNP) / 10
     
     # Cox model
     model <- coxph(
@@ -125,7 +125,7 @@ cox_results$FDR <- p.adjust(
     cox_results$pvalue,
     method = "BH"
 )
-    
+    write.csv(cox_results, "cox.csv")
 #     pathway       HR    CI_low  CI_high      pvalue        FDR
 # 1  hsa04518 1.350671 1.0028659 1.819098 0.047838196 0.06909962
 # 2  hsa04611 1.414180 1.0577650 1.890690 0.019335579 0.04189375
