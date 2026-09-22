@@ -110,7 +110,7 @@ for (pathway in rownames(gsva_res)) {
     clinical$score <- as.numeric(
         scale(clinical$score)
     )
-    clinical$zmiana.NTproBNP_10 <- as.numeric(clinical$zmiana.NTproBNP) / 10
+    clinical$zmiana.NTproBNP_10 <- as.numeric(clinical$zmiana.NTproBNP)
     
     # Cox model
     model <- coxph(
