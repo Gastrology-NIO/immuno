@@ -9,9 +9,38 @@ library(survival)
 
 library(httr)
 library(dplyr)
-#As metadata, we should use all metadata, not only edge cases
-run_cox <- function(x, dds, metadata, kegg) {
+name<-"checkpoint1_3months_vs_Over2Years"
+folder<-paste0("./result/",name,"/")
+conditions <- list(type='checkpoint 1', 'time.of.OS'=c('under 3 months', 'over 2 years'))
+metadata_1_analyse <- cut_metadata(metadata, conditions)
+metadata_1_analyse$research<-metadata_1_analyse$'time.of.OS'
+metadata_1_analyse$research[metadata_1_analyse$research=='under 3 months']<-"Control"
+metadata_1_analyse$research[metadata_1_analyse$research=='over 2 years']<-"Searched"
 
+run_analyse(folder, metadata_1_analyse, name, analyse_pairs=F, analyse_sex=T)
+deconvolution_difference(name, metadata_1_analyse)
+
+name<-"checkpoint1_3months_vs_Over2Years"
+folder<-paste0("./result/",name,"/")
+conditions <- list(type='checkpoint 1')
+metadata_checkpoint1 <- cut_metadata(metadata, conditions)
+x<-load_DGE(metadata_checkpoint1,  "./htseq/") 
+dge <- calcNormFactors(x)
+
+# log-CPM
+expr <- cpm(
+    dge,
+    log = TRUE,
+    prior.count = 1
+)
+rownames(expr) <- sub("\\..*$", "", rownames(expr))
+colnames(expr) <- basename(colnames(expr))
+
+#As metadata, we should use all metadata, not only edge cases
+run_cox <- function(metadata, kegg, name) {
+
+    
+        
     kegg_sig <- kegg[kegg$p.adjust < 0.05, ]
 
 
@@ -119,7 +148,6 @@ for (pathway in rownames(gsva_res)) {
         )
     )
 }
-
 
 cox_results$FDR <- p.adjust(
     cox_results$pvalue,
