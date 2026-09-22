@@ -10,7 +10,7 @@ library(survival)
 library(httr)
 library(dplyr)
 #As metadata, we should use all metadata, not only edge cases
-run_analyse <- function(x, dds, metadata, kegg) {
+run_cox <- function(x, dds, metadata, kegg) {
 
     kegg_sig <- kegg[kegg$p.adjust < 0.05, ]
 
@@ -90,10 +90,11 @@ for (pathway in rownames(gsva_res)) {
     clinical$score <- as.numeric(
         scale(clinical$score)
     )
+    df$zmiana.NTproBNP_10 <- as.numeric(df$zmiana.NTproBNP) / 10
     
     # Cox model
     model <- coxph(
-        Surv(dni, zgon_bool) ~ score +s +wzrost.NtproBNP,
+        Surv(dni, zgon_bool) ~ score +s +zmiana.NTproBNP_10,
         data = clinical
     )
     
