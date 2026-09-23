@@ -317,3 +317,162 @@ cor_results <- cor_results[
   order(cor_results$padj, -abs(cor_results$rho)),
 ]
 
+
+
+
+GSVA to GO to metadata_5 checkpoint2
+
+
+
+metadata<-load_data_meta("./data/metadata_jag.csv")
+conditions <- list(type='checkpoint 2')
+metadata_checkpoint1 <- cut_metadata(metadata, conditions)
+metadata_checkpoint1<- metadata_checkpoint1[metadata_checkpoint1$probe_name != "",]
+metadata_checkpoint1<-metadata_checkpoint1[!c(metadata_checkpoint1$probe_name %in% c("63IM")),]
+x<-load_DGE(metadata_checkpoint1,  "./htseq2/") 
+dge <- calcNormFactors(x)
+
+expr <- cpm(
+dge,
+log = TRUE,
+prior.count = 1
+)
+rownames(expr) <- sub("\\..*$", "", rownames(expr))
+colnames(expr) <- basename(colnames(expr))
+gsva_mat<-c()
+go<-enrich_MF
+go_sig <- go[go$p.adjust < 0.05, ]
+gene_sets <- list()
+
+# pobieramy poprawne mapowanie Entrez -> GO
+go2gene <- AnnotationDbi::select(
+  org.Hs.eg.db,
+  keys = keys(org.Hs.eg.db, keytype = "ENTREZID"),
+  keytype = "ENTREZID",
+  columns = c("ENTREZID", "GO")
+)
+
+# usuwamy puste przypisania
+go2gene <- go2gene[
+  !is.na(go2gene$GO) &
+  !is.na(go2gene$ENTREZID),
+]
+
+for (go_id in go_sig$ID) {
+
+  print(go_id)
+
+  # GO -> Entrez
+  entrez_genes <- unique(
+    go2gene$ENTREZID[
+      go2gene$GO == go_id
+    ]
+  )
+
+  # jeśli GO nie ma w bazie
+  if (length(entrez_genes) == 0) {
+    warning(
+      paste("Brak genów dla", go_id)
+    )
+    gene_sets[[go_id]] <- character(0)
+    next
+  }
+
+  # Entrez -> Ensembl
+  ensembl_genes <- mapIds(
+    org.Hs.eg.db,
+    keys = entrez_genes,
+    keytype = "ENTREZID",
+    column = "ENSEMBL",
+    multiVals = "first"
+  )
+
+  ensembl_genes <- unique(
+    na.omit(ensembl_genes)
+  )
+
+  # tylko geny obecne w macierzy ekspresji
+  ensembl_genes <- intersect(
+    ensembl_genes,
+    rownames(expr)
+  )
+
+  gene_sets[[go_id]] <- ensembl_genes
+}
+
+# rozmiary gene setów po dopasowaniu do RNA-seq
+gene_set_sizes <- sapply(
+  gene_sets,
+  length
+)
+
+
+summary(gene_set_sizes)
+
+# opcjonalnie usuwamy bardzo małe zestawy
+gene_sets <- gene_sets[
+  gene_set_sizes >= 10
+]
+
+# GSVA
+param <- gsvaParam(
+  exprData = expr,
+  geneSets = gene_sets
+)
+
+gsva_res <- gsva(param)
+gsva_mat <- gsva_res
+rownames(metadata_checkpoint1) <- metadata_checkpoint1$probe_name
+
+# dopasowanie próbek GSVA do metadata
+common_samples <- intersect(
+  colnames(gsva_mat),
+  rownames(metadata_checkpoint1)
+)
+
+gsva_mat <- gsva_mat[, common_samples, drop = FALSE]
+meta_cor <- metadata_checkpoint1[common_samples, , drop = FALSE]
+
+# sprawdzenie kolejności
+identical(colnames(gsva_mat), rownames(meta_cor))
+
+
+
+cor_results <- data.frame()
+
+for (go_id in rownames(gsva_mat)) {
+
+  x <- as.numeric(meta_cor$zmiana.NTproBNP)
+  y <- gsva_mat[go_id, ]
+
+  keep <- complete.cases(x, y)
+
+  if (sum(keep) >= 3) {
+
+    test <- cor.test(
+      x[keep],
+      y[keep],
+      method = "spearman"
+    )
+
+    cor_results <- rbind(
+      cor_results,
+      data.frame(
+        GO = go_id,
+        rho = unname(test$estimate),
+        p_value = test$p.value,
+        n = sum(keep)
+      )
+    )
+  }
+}
+
+cor_results$padj <- p.adjust(
+  cor_results$p_value,
+  method = "BH"
+)
+
+cor_results <- cor_results[
+  order(cor_results$padj, -abs(cor_results$rho)),
+]
+write.csv2(cor_results, "corr_MF_Cardiac_biomarker_defined.csv")
