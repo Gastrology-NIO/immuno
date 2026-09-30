@@ -1,8 +1,3 @@
-if (!requireNamespace("BiocManager", quietly = TRUE))
-    install.packages("BiocManager")
-
-BiocManager::install("immunedeconv")
-
 library(immunedeconv)
 library(EnsDb.Hsapiens.v86)
 library(ensembldb)
@@ -10,10 +5,6 @@ library(tidyr)
 library(dplyr)
 library(ggplot2)
 library(rstatix)
-
-
-
-############################
 
 deconvolution_difference<-function(name, metadata){
     gene_info <- genes(
@@ -188,48 +179,3 @@ deconvolution_difference<-function(name, metadata){
           dpi = 300
         )
     }
-#######################
-
-
-# cell_stats
-
-
-# cor.test(
-#     clinical$Platelet_activation,
-#     clinical$Neutrophils,
-#     method = "spearman"
-# )
-
-
-
-# cor_results <- expand.grid(
-#     pathway = c(
-#         "Platelet_activation",
-#         "Coagulation"
-#     ),
-#     cell = cell_cols,
-#     stringsAsFactors = FALSE
-# )
-
-# cor_results <- cor_results %>%
-#     rowwise() %>%
-#     mutate(
-#         rho = cor.test(
-#             clinical[[pathway]],
-#             clinical[[cell]],
-#             method = "spearman"
-#         )$estimate,
-#         pvalue = cor.test(
-#             clinical[[pathway]],
-#             clinical[[cell]],
-#             method = "spearman"
-#         )$p.value
-#     ) %>%
-#     ungroup()
-
-# cor_results$FDR <- p.adjust(
-#     cor_results$pvalue,
-#     method = "BH"
-# )
-
-
