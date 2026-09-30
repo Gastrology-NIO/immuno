@@ -1,4 +1,4 @@
-BiocManager::install(pathview)
+
 library(pathview)
 
 see_pathview <- function(..., save_image = FALSE)
