@@ -1,3 +1,4 @@
+library(limma)
 
 get_voom<-function(x, metadata){
     s<-metadata$s
@@ -71,11 +72,8 @@ run_deseq2_paired<-function(x, metadata){
 
 sensitivity_limma <- function(v, metadata, outlier, design_formula = ~ s + research) {
 
-  library(limma)
 
-  # ----------------------------
   # 1. INDEX OUTLIERA
-  # ----------------------------
   keep <- metadata$probe_name != outlier
   
   v_full <- v
@@ -84,15 +82,11 @@ sensitivity_limma <- function(v, metadata, outlier, design_formula = ~ s + resea
   meta_full <- metadata
   meta_sub  <- metadata[keep, ]
   
-  # ----------------------------
   # 2. DESIGN MATRICES
-  # ----------------------------
   design_full <- model.matrix(design_formula, data = meta_full)
   design_sub  <- model.matrix(design_formula, data = meta_sub)
   
-  # ----------------------------
   # 3. FIT MODELS (limma)
-  # ----------------------------
   fit_full <- lmFit(v_full, design_full)
   contr <- makeContrasts(researchSearched, levels = colnames(coef(fit_full)))
   fit_full <- eBayes(contrasts.fit(fit_full, contr))
@@ -103,14 +97,10 @@ sensitivity_limma <- function(v, metadata, outlier, design_formula = ~ s + resea
   fit_sub <- eBayes(contrasts.fit(fit_sub, contr))
   res_sub <- topTable(fit_sub, number = Inf, sort.by = "none")
   
-  # ----------------------------
   # 4. COMMON GENES
-  # ----------------------------
   common <- intersect(rownames(res_full), rownames(res_sub))
   
-  # ----------------------------
   # 5. STABILITY METRICS
-  # ----------------------------
   x <- res_full[common, "logFC"]
   y <- res_sub[common, "logFC"]
   
@@ -124,9 +114,7 @@ sensitivity_limma <- function(v, metadata, outlier, design_formula = ~ s + resea
   overlap_deg <- length(intersect(sig_full, sig_sub))
   deg_loss <- length(sig_full) - overlap_deg
   
-  # ----------------------------
   # 6. MDS SHIFT (INFLUENCE COMPONENT)
-  # ----------------------------
   mds_full <- plotMDS(v_full, plot = FALSE)
   mds_sub  <- plotMDS(v_sub, plot = FALSE)
 
@@ -136,18 +124,14 @@ sensitivity_limma <- function(v, metadata, outlier, design_formula = ~ s + resea
   )
 
 
-  # ----------------------------
-  # 7. INFLUENCE SCORE (PAPER-STYLE)
-  # ----------------------------
+  # 7. INFLUENCE SCORE
   max_deg_loss <- max(deg_loss, 1)
 logfc_diff <- abs(x - y)
     influence_score <-
   (1 - logfc_cor) +
   mean(logfc_diff[is.finite(logfc_diff)])
 
-  # ----------------------------
   # 8. PLOT
-  # ----------------------------
   pdf(paste0("sensitivity_analysis_", outlier, ".pdf"), width = 7, height = 7)
 
   plot(x[ok], y[ok],
@@ -160,9 +144,7 @@ logfc_diff <- abs(x - y)
 
   dev.off()
 
-  # ----------------------------
   # 9. OUTPUT
-  # ----------------------------
   cat("\n============================\n")
   cat("Sensitivity analysis:", outlier, "\n")
   cat("============================\n")
